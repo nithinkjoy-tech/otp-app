@@ -1,10 +1,10 @@
 <script>
-	let {showInput, inputType} = $props()
+	import {onMount, tick} from "svelte"
+	let {showInput, inputType, index} = $props()
+	let otpInput
 </script>
 
-{#if showInput}
-	<input class="single-otp-input" type="{inputType}" />
-{/if}
+<input class="single-otp-input" bind:this={otpInput} type="{inputType}" />
 
 <style>
     .single-otp-input {
