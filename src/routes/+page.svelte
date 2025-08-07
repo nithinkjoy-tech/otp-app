@@ -13,7 +13,7 @@
 {/snippet}
 
 <div id="app">
-	<OtpInput showInput={true} {numInputs} {onChange}></OtpInput>
+	<OtpInput showInput={true} {numInputs} {onChange} {shouldAutoFocus}></OtpInput>
 </div>
 <style>
 	.custom-separator {
