@@ -1,35 +1,62 @@
 <script>
 	import SingleOtpInput from '$lib/components/SingleOtpInput.svelte';
-
-	// Fix 1: Use $state for reactive array
-	let inputRefs = $state([])
-
-	// Fix 2: Proper props destructuring
+	import { onMount } from 'svelte';
 	let {
 		showInput,
 		inputType = "number",
 		numInputs = 4,
 		separatorSnippet = null,
-		separator = '-'
+		separator = '-',
+		shouldAutoFocus = false,
+		onChange = () => {},
 	} = $props();
 
-	// Fix 3: Initialize refs array when numInputs changes
-	$effect(() => {
-		inputRefs = Array(numInputs).fill(null);
-	});
 
-	// Fix 4: Focus first input when component is shown
-	$effect(() => {
-		setTimeout(()=>{
-			console.log({inputRefs})
-		}, 20)
-		if (showInput && inputRefs.length > 0) {
-			// Small delay to ensure DOM is ready
-			setTimeout(() => {
-				inputRefs[0]?.focus();
-			}, 0);
+	let focusIndex = $state(null);
+	let inputRefs
+		= $state(Array(numInputs).fill(''));
+
+	// $inspect("value: ",value)
+
+	onMount(() => {
+		if (shouldAutoFocus) {
+			focusIndex = 0;
 		}
-	});
+	})
+
+	// $effect(() => {
+	// 	if (focusIndex !== null && inputRefs[focusIndex]) {
+	// 		inputRefs[focusIndex].focus();
+	// 		inputRefs[focusIndex].select();
+	// 	}
+	// });
+
+
+	function handleInputChange(event, index) {
+		console.log("handleInputChange: ", event, index)
+		// onChange(event);
+		if (event.key === 'Backspace') {
+			if (inputRefs[index] === '') {
+				if (index > 0) {
+					inputRefs[index] = inputRefs[index - 1];
+					inputRefs[index - 1] = '';
+					focusIndex = index - 1;
+				}
+			}
+		} else {
+			if (index < numInputs - 1) {
+				focusIndex = index + 1;
+			} else {
+				focusIndex = null;
+			}
+		}
+	}
+
+	function handleInputFocus(event, index) {
+		// console.log("handleInputFocus: ",event, index)
+		console.log("need to focus", index)
+		focusIndex = index;
+	}
 </script>
 
 {#snippet renderSeparator(index)}
@@ -49,7 +76,13 @@
 				{showInput}
 				{inputType}
 				{index}
-				bind:ref={inputRefs[index]}
+				value={inputRefs[index]}
+				{shouldAutoFocus}
+				{focusIndex}
+				{handleInputChange}
+				{handleInputFocus}
+				{numInputs}
+				bind:inputRef={inputRefs[index]}
 			/>
 			{@render renderSeparator(index)}
 		{/each}

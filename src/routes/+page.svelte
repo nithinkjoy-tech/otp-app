@@ -1,6 +1,11 @@
 <script>
 	import OtpInput from '$lib/components/OtpInput.svelte';
 	let numInputs = $state(6);
+	let shouldAutoFocus = true
+
+	function onChange(event){
+		console.log('onChange clalled', event)
+	}
 </script>
 
 {#snippet separatorSnippet()}
@@ -8,7 +13,7 @@
 {/snippet}
 
 <div id="app">
-	<OtpInput showInput={true} {numInputs}></OtpInput>
+	<OtpInput showInput={true} {numInputs} {onChange}></OtpInput>
 </div>
 <style>
 	.custom-separator {
