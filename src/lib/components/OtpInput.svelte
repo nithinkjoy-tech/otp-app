@@ -1,5 +1,4 @@
 <script>
-	// import SingleOtpInput from '$lib/components/SingleOtpInput.svelte';
 	import { onMount } from 'svelte';
 	let {
 		showInput,
@@ -8,7 +7,6 @@
 		separatorSnippet = null,
 		separator = '-',
 		shouldAutoFocus = false,
-		onChange = () => {}
 	} = $props();
 
 	let focusIndex = $state(null);
@@ -22,9 +20,7 @@
 	});
 
 	$effect(() => {
-		console.log('effect calling: ', focusIndex, inputRefs);
 		if (focusIndex !== null && inputRefs[focusIndex]) {
-			console.log('focusIndex: ', focusIndex);
 			setTimeout(() => {
 				inputRefs[focusIndex].focus();
 				inputRefs[focusIndex].select();
@@ -32,30 +28,22 @@
 		}
 	});
 
-	function handleInputChange(event, index, source) {
-		console.log('source: ', source);
-		console.log('handleInputChange: ', event, index);
-
-		if (
+	function handleInputChange(event, index) {
+		const isDelete =
 			event.inputType === 'deleteContentBackward' ||
 			event.key === 'Backspace' ||
-			event.key === 'deleteContentCut'
-		) {
-			focusIndex = index - 1;
-		} else {
-			if (index < numInputs - 1) {
-				focusIndex = index + 1;
-			}
-		}
+			event.key === 'deleteContentCut';
+
+		focusIndex = isDelete ? index - 1 : Math.min(index + 1, numInputs - 1);
+
 		if (focusIndex === numInputs - 1) {
 			setTimeout(() => {
-				console.log('inside set: ', focusIndex);
-				inputRefs[focusIndex].select();
+				inputRefs[focusIndex]?.select();
 			});
 		}
 	}
 
-	function handleInputFocus(event, index) {
+	function handleInputFocus(_, index) {
 		focusIndex = index;
 	}
 </script>
@@ -117,7 +105,7 @@
 					}
 				}}
 				onfocus={(e) => handleInputFocus(e, index)}
-				oninput={(e) => handleInputChange(e, index, 'evvvnt')}
+				oninput={(e) => handleInputChange(e, index)}
 				maxlength="1"
 			/>
 			{@render renderSeparator(index)}
