@@ -1,29 +1,28 @@
 <script>
 	import { onMount } from 'svelte';
+
 	let {
 		showInput,
 		inputType = 'number',
 		numInputs = 4,
 		separatorSnippet = null,
 		separator = '-',
-		shouldAutoFocus = false,
+		shouldAutoFocus = false
 	} = $props();
 
 	let focusIndex = $state(null);
-	let inputRefs = Array(numInputs).fill('');
-	let inputValue = Array(numInputs).fill('');
+	let inputRefs = Array(numInputs).fill(null);
+	let inputValues = Array(numInputs).fill('');
 
 	onMount(() => {
-		if (shouldAutoFocus) {
-			focusIndex = 0;
-		}
+		if (shouldAutoFocus) focusIndex = 0;
 	});
 
 	$effect(() => {
 		if (focusIndex !== null && inputRefs[focusIndex]) {
 			setTimeout(() => {
-				inputRefs[focusIndex].focus();
-				inputRefs[focusIndex].select();
+				inputRefs[focusIndex]?.focus();
+				inputRefs[focusIndex]?.select();
 			});
 		}
 	});
@@ -36,15 +35,18 @@
 
 		focusIndex = isDelete ? index - 1 : Math.min(index + 1, numInputs - 1);
 
+		// Select last field only
 		if (focusIndex === numInputs - 1) {
-			setTimeout(() => {
-				inputRefs[focusIndex]?.select();
-			});
+			setTimeout(() => inputRefs[focusIndex]?.select());
 		}
 	}
 
 	function handleInputFocus(_, index) {
 		focusIndex = index;
+	}
+
+	function isInvalidNumberKey(key) {
+		return ['e', 'E', '+', '-', '.'].includes(key);
 	}
 </script>
 
@@ -60,53 +62,43 @@
 
 {#if showInput}
 	<div class="otp-input-lib-container">
-		{#each Array(numInputs)
-			.fill()
-			.map((_, i) => i) as index}
+		{#each Array(numInputs).fill() as _, index}
 			<input
 				class="single-otp-input"
-				bind:this={inputRefs[index]}
 				type={inputType}
+				bind:this={inputRefs[index]}
 				bind:value={
-					() => inputValue[index],
-					(v) =>
-						(inputValue[index] = (function (v) {
-							console.log('v: ', v);
-							return v?.toString()?.substring(0, 1);
-						})(v))
+					() => inputValues[index],
+					(v) => {
+						inputValues[index] = v?.toString()?.substring(0, 1);
+					}
 				}
+				maxlength="1"
 				onkeydown={(e) => {
-					if (inputType === 'number') {
-						if (['e', 'E', '+', '-', '.'].includes(e.key)) {
-							e.preventDefault();
-						}
-					}
-
-					if (e.key === 'Backspace') {
-						if (inputRefs[index].value) {
-							handleInputChange(e, index - 1);
-						} else {
-							handleInputFocus(e, index - 1);
-						}
-					}
-
-					if (e.key === 'ArrowLeft') {
-						if (index > 0) handleInputFocus(e, index - 1, true);
-						else e.preventDefault();
-					}
-
-					if (e.key === 'ArrowRight') {
-						if (index < numInputs - 1) handleInputFocus(e, index + 1, true);
-						else e.preventDefault();
-					}
-
-					if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+					if (inputType === 'number' && isInvalidNumberKey(e.key)) {
 						e.preventDefault();
 					}
+
+					switch (e.key) {
+						case 'Backspace':
+							inputRefs[index].value
+								? handleInputChange(e, index - 1)
+								: handleInputFocus(e, index - 1);
+							break;
+						case 'ArrowLeft':
+							index > 0 ? handleInputFocus(e, index - 1) : e.preventDefault();
+							break;
+						case 'ArrowRight':
+							index < numInputs - 1 ? handleInputFocus(e, index + 1) : e.preventDefault();
+							break;
+						case 'ArrowUp':
+						case 'ArrowDown':
+							e.preventDefault();
+							break;
+					}
 				}}
-				onfocus={(e) => handleInputFocus(e, index)}
 				oninput={(e) => handleInputChange(e, index)}
-				maxlength="1"
+				onfocus={(e) => handleInputFocus(e, index)}
 			/>
 			{@render renderSeparator(index)}
 		{/each}
@@ -128,11 +120,9 @@
 		text-align: center;
 		font-size: 40px;
 		line-height: 60px;
-		vertical-align: middle;
 		margin: 0 12px;
 		border: 2px solid #6f6e6c;
 		box-sizing: border-box;
-
 		-moz-appearance: textfield;
 		appearance: textfield;
 	}
