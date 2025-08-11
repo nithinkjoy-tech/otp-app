@@ -11,8 +11,10 @@
 		placeholder = ''
 	} = $props();
 
+	console.log({inputType})
+
 	let focusIndex = $state(null);
-	let inputRefs = Array(numInputs).fill(null);
+	let inputRefs = $state(Array(numInputs).fill(null));
 	let inputValues = $state(Array(numInputs).fill(''));
 
 	onMount(() => {
@@ -27,6 +29,12 @@
 			});
 		}
 	});
+
+	function getInputType(index) {
+		if (typeof inputType === 'string') return inputType;
+		if (Array.isArray(inputType)) return inputType[index] ?? 'text';
+		return 'text';
+	}
 
 	function handleInputChange(event, index) {
 		const isDelete =
@@ -47,10 +55,7 @@
 
 	function handleInputPaste(event, index) {
 		event.preventDefault();
-		const pastedData = event.clipboardData
-			.getData('text/plain')
-			.slice(0, numInputs)
-			.split('');
+		const pastedData = event.clipboardData.getData('text/plain').slice(0, numInputs).split('');
 
 		// Prevent pasting if the clipboard data contains non-numeric values for number inputs
 		if (inputType === 'number' && pastedData.some((value) => isNaN(Number(value)))) return;
@@ -73,7 +78,33 @@
 	}
 
 	function isInvalidNumberKey(key) {
-		return ['e', 'E', '+', '-', '.'].includes(key);
+	  // Returns true for any key that's not 0-9
+	  return /[^0-9]/.test(key);
+	}
+
+	function validateStringInput(e) {
+		if(inputType === 'number') {
+			if(isInvalidNumberKey(e.key)) {
+				e.preventDefault();
+			}
+		}
+	}
+
+	function validateInput(e, index, _inputType = 'text') {
+		console.log({ab:e,_inputType,index})
+		if(typeof _inputType === 'string') {
+			if(_inputType === 'number') {
+				if(isInvalidNumberKey(e.key)) {
+					e.preventDefault();
+				}
+			}
+		} else if(Array.isArray(_inputType)) {
+			validateInput(e, index, _inputType[index])
+		} else if(_inputType instanceof RegExp) {
+			if(!(_inputType).test(e.key)) {
+				e.preventDefault();
+			}
+		}
 	}
 </script>
 
@@ -92,7 +123,7 @@
 		{#each Array(numInputs).fill() as _, index}
 			<input
 				class="single-otp-input"
-				type={inputType}
+				type={getInputType(index)}
 				bind:this={inputRefs[index]}
 				bind:value={
 					() => inputValues[index],
@@ -103,9 +134,9 @@
 				maxlength="1"
 				placeholder={placeholder[index] || ''}
 				onkeydown={(e) => {
-					if (inputType === 'number' && isInvalidNumberKey(e.key)) {
-						e.preventDefault();
-					}
+					// if (typeof inputType === 'string') return inputType;
+					// if (Array.isArray(inputType)) return inputType[index] ?? 'text';
+					console.log({e})
 
 					switch (e.key) {
 						case 'Backspace':
@@ -123,6 +154,8 @@
 						case 'ArrowDown':
 							e.preventDefault();
 							break;
+						default:
+							validateInput(e, index, inputType)
 					}
 				}}
 				oninput={(e) => handleInputChange(e, index)}

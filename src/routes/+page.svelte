@@ -1,8 +1,10 @@
 <script>
 	import OtpInput from '$lib/components/OtpInput.svelte';
-	let numInputs = $state(6);
+	let numInputs = $state(4);
 	let placeholder = $state('1111');
-	let inputType = $state('tel');
+	// let inputType = $state('tel');
+	let inputType = $state(['number','text','number',/^[A-Za-z]+$/]);
+
 	let shouldAutoFocus = true;
 
 	function onChange(event) {
