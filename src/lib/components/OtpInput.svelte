@@ -5,13 +5,12 @@
 		showInput,
 		inputType = 'number',
 		numInputs = 4,
-		separatorSnippet = null,
 		separator = '-',
+		groupSeparator = '||',
 		shouldAutoFocus = false,
-		placeholder = ''
+		placeholder = '',
+		group = null
 	} = $props();
-
-	console.log({inputType})
 
 	let focusIndex = $state(null);
 	let inputRefs = $state(Array(numInputs).fill(null));
@@ -29,6 +28,23 @@
 			});
 		}
 	});
+
+	let groupHelper = $derived((group, numInputs) => {
+		if (
+			!Array.isArray(group) ||
+			!group.every(Number.isInteger) ||
+			group.reduce((sum, n) => sum + n, 0) !== numInputs
+		) {
+			return [];
+		}
+
+		return group.reduce((arr, n, i) => {
+			arr.push((arr.at(-1) || 0) + n);
+			return arr;
+		}, []);
+	});
+
+	let isValidGroup = $derived((index) => groupHelper(group, numInputs).includes(index + 1));
 
 	function getInputType(index) {
 		if (typeof inputType === 'string') return inputType;
@@ -78,30 +94,73 @@
 	}
 
 	function isInvalidNumberKey(key) {
-	  // Returns true for any key that's not 0-9
-	  return /[^0-9]/.test(key);
+		// Returns true for any key that's not 0-9
+		return /[^0-9]/.test(key);
 	}
 
-	function validateStringInput(e) {
-		if(inputType === 'number') {
-			if(isInvalidNumberKey(e.key)) {
-				e.preventDefault();
-			}
-		}
+	// As of now svelte doesn't have an inbuilt way to determine whether it is a snippet or not
+	function isSnippet(fn) {
+		return typeof fn === 'function' && fn.toString !== Function.prototype.toString;
+	}
+
+	function transformCase(e, input) {
+		requestAnimationFrame(() => {
+			const { selectionStart, selectionEnd, value } = e.target;
+			const before = value.slice(0, selectionStart - 1);
+			const after = value.slice(selectionEnd);
+			e.target.value = before + input + after;
+			e.target.setSelectionRange(selectionStart, selectionStart);
+			e.target.dispatchEvent(new Event('input', { bubbles: true }));
+		});
 	}
 
 	function validateInput(e, index, _inputType = 'text') {
-		console.log({ab:e,_inputType,index})
-		if(typeof _inputType === 'string') {
-			if(_inputType === 'number') {
-				if(isInvalidNumberKey(e.key)) {
+		if (typeof _inputType === 'string') {
+			if (_inputType === 'number') {
+				if (isInvalidNumberKey(e.key)) {
 					e.preventDefault();
 				}
+			} else if (_inputType === 'alnum') {
+				if (!/^[a-zA-Z0-9]$/.test(e.key)) {
+					e.preventDefault();
+				}
+			} else if (_inputType === 'uppercase') {
+				if (!/^[a-zA-Z]$/.test(e.key)) {
+					e.preventDefault();
+					return;
+				}
+				if (/^[a-z]$/.test(e.key)) {
+					transformCase(e, e.key.toUpperCase());
+				}
+			} else if (_inputType === 'lowercase') {
+				if (!/^[a-zA-Z]$/.test(e.key)) {
+					e.preventDefault();
+					return;
+				}
+				if (/^[A-Z]$/.test(e.key)) {
+					transformCase(e, e.key.toLowerCase());
+				}
+			} else if (_inputType === 'upper-alnum') {
+				if (!/^[a-zA-Z0-9]$/.test(e.key)) {
+					e.preventDefault();
+					return;
+				}
+				if (/^[a-z]$/.test(e.key)) {
+					transformCase(e, e.key.toUpperCase());
+				}
+			} else if (_inputType === 'lower-alnum') {
+				if (!/^[a-zA-Z0-9]$/.test(e.key)) {
+					e.preventDefault();
+					return;
+				}
+				if (/^[A-Z]$/.test(e.key)) {
+					transformCase(e, e.key.toLowerCase());
+				}
 			}
-		} else if(Array.isArray(_inputType)) {
-			validateInput(e, index, _inputType[index])
-		} else if(_inputType instanceof RegExp) {
-			if(!(_inputType).test(e.key)) {
+		} else if (Array.isArray(_inputType)) {
+			validateInput(e, index, _inputType[index]);
+		} else if (_inputType instanceof RegExp) {
+			if (!_inputType.test(e.key)) {
 				e.preventDefault();
 			}
 		}
@@ -110,9 +169,23 @@
 
 {#snippet renderSeparator(index)}
 	{#if index !== numInputs - 1}
-		{#if separatorSnippet}
-			{@render separatorSnippet()}
-		{:else if separator}
+		{#if isValidGroup(index)}
+			{#if groupSeparator}
+				{#if isSnippet(groupSeparator)}
+					{@render groupSeparator()}
+				{:else}
+					<span>{groupSeparator}</span>
+				{/if}
+			{/if}
+		{:else if Array.isArray(separator)}
+			{#if isSnippet(separator[index])}
+				{@render separator[index]()}
+			{:else}
+				<span>{separator[index]}</span>
+			{/if}
+		{:else if isSnippet(separator)}
+			{@render separator()}
+		{:else}
 			<span>{separator}</span>
 		{/if}
 	{/if}
@@ -134,10 +207,6 @@
 				maxlength="1"
 				placeholder={placeholder[index] || ''}
 				onkeydown={(e) => {
-					// if (typeof inputType === 'string') return inputType;
-					// if (Array.isArray(inputType)) return inputType[index] ?? 'text';
-					console.log({e})
-
 					switch (e.key) {
 						case 'Backspace':
 							inputRefs[index].value
@@ -155,7 +224,7 @@
 							e.preventDefault();
 							break;
 						default:
-							validateInput(e, index, inputType)
+							validateInput(e, index, inputType);
 					}
 				}}
 				oninput={(e) => handleInputChange(e, index)}
