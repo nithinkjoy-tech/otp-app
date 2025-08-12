@@ -169,8 +169,11 @@
 </script>
 
 {#snippet renderSeparator(index)}
+	{@const validGroup = isValidGroup(index)}
+	{@const sep = Array.isArray(separator) ? separator[index] : separator}
+
 	{#if index !== numInputs - 1}
-		{#if isValidGroup(index)}
+		{#if validGroup}
 			{#if groupSeparator}
 				{#if isSnippet(groupSeparator)}
 					{@render groupSeparator()}
@@ -179,25 +182,29 @@
 				{/if}
 			{/if}
 		{:else if Array.isArray(separator)}
-			{#if isSnippet(separator[index])}
-				{@render separator[index]()}
+			{#if isSnippet(sep)}
+				{@render sep()}
 			{:else}
-				<span>{separator[index]}</span>
+				<span>{sep}</span>
 			{/if}
-		{:else if isSnippet(separator)}
-			{@render separator()}
+		{:else if isSnippet(sep)}
+			{@render sep()}
 		{:else}
-			<span>{separator}</span>
+			<span>{sep}</span>
 		{/if}
 	{/if}
 {/snippet}
 
+
 {#if showInput}
 	<div class="otp-input-lib-container">
 		{#each Array(numInputs).fill() as _, index}
+			{@const type = getInputType(index)}
+			{@const ph = placeholder[index] || ''}
+
 			<input
 				class="single-otp-input"
-				type={getInputType(index)}
+				type={type}
 				bind:this={inputRefs[index]}
 				bind:value={
 					() => inputValues[index],
@@ -206,7 +213,7 @@
 					}
 				}
 				maxlength="1"
-				placeholder={placeholder[index] || ''}
+				placeholder={ph}
 				onkeydown={(e) => {
 					switch (e.key) {
 						case 'Backspace':
