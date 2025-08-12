@@ -99,6 +99,7 @@
 	}
 
 	// As of now svelte doesn't have an inbuilt way to determine whether it is a snippet or not
+	// still under discussion https://github.com/sveltejs/svelte/issues/9774
 	function isSnippet(fn) {
 		return typeof fn === 'function' && fn.toString !== Function.prototype.toString;
 	}
