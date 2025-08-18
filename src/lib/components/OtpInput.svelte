@@ -9,7 +9,11 @@
 		groupSeparator = '||',
 		shouldAutoFocus = false,
 		placeholder = '',
-		group = null
+		group = null,
+		isError = false,
+		containerStyles = ``,
+		inputStyles = ``,
+		inputFocusStyle = ``
 	} = $props();
 
 	let focusIndex = $state(null);
@@ -29,6 +33,11 @@
 		}
 	});
 
+	$effect(() => {
+		let groupSum = group?.reduce((acc, curr) => acc + curr);
+		if (groupSum !== numInputs) throw new Error('Sum of groups must be equal to numInputs');
+	});
+
 	let groupHelper = $derived((group, numInputs) => {
 		if (
 			!Array.isArray(group) ||
@@ -38,7 +47,7 @@
 			return [];
 		}
 
-		return group.reduce((arr, n, i) => {
+		return group.reduce((arr, n) => {
 			arr.push((arr.at(-1) || 0) + n);
 			return arr;
 		}, []);
@@ -65,8 +74,18 @@
 		}
 	}
 
+	function getInputStyles(index) {
+		if (typeof inputStyles === 'string') return inputStyles;
+		if(Array.isArray(inputStyles)) return inputStyles[index];
+	}
+
 	function handleInputFocus(_, index) {
+		let prevIndex = focusIndex;
 		focusIndex = index;
+		// setTimeout(()=>{
+			if (inputFocusStyle) inputRefs[focusIndex].style.cssText += `;${inputFocusStyle} !important;`;
+			if (inputFocusStyle) inputRefs[prevIndex].style.cssText += `;${inputFocusStyle} !important;`;
+		// })
 	}
 
 	function handleInputPaste(event, index) {
@@ -195,16 +214,17 @@
 	{/if}
 {/snippet}
 
-
 {#if showInput}
-	<div class="otp-input-lib-container">
+	<div class="otp-input-lib-container" style={containerStyles}>
 		{#each Array(numInputs).fill() as _, index}
 			{@const type = getInputType(index)}
 			{@const ph = placeholder[index] || ''}
+			{@const inputStyle = getInputStyles(index)}
 
 			<input
-				class="single-otp-input"
-				type={type}
+				class={['single-otp-input', isError && 'otp-input-error']}
+				style={inputStyle}
+				{type}
 				bind:this={inputRefs[index]}
 				bind:value={
 					() => inputValues[index],
@@ -245,6 +265,10 @@
 {/if}
 
 <style>
+    input:focus {
+        outline: none;
+    }
+
 	.otp-input-lib-container {
 		display: flex;
 		flex-direction: row;
@@ -264,6 +288,10 @@
 		box-sizing: border-box;
 		-moz-appearance: textfield;
 		appearance: textfield;
+	}
+
+	.otp-input-error {
+			border: 2px solid red;
 	}
 
 	.single-otp-input::-webkit-inner-spin-button,
