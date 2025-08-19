@@ -22,7 +22,25 @@
 
 	onMount(() => {
 		if (shouldAutoFocus) focusIndex = 0;
+		if(inputFocusStyle) {
+			for (let i = 0; i < numInputs; i++) {
+				inputRefs[i].addEventListener("focus", () => applyFocusStyle(inputRefs[i], getInputFocusStyles(i)));
+				inputRefs[i].addEventListener("blur", () => removeFocusStyle(inputRefs[i]));
+			}
+		}
 	});
+
+	function applyFocusStyle(el, style) {
+		el.dataset.prevStyle = el.style.cssText;
+		el.style.cssText += style;
+	}
+
+	function removeFocusStyle(el) {
+		if (el.dataset.prevStyle !== undefined) {
+			el.style.cssText = el.dataset.prevStyle;
+			delete el.dataset.prevStyle;
+		}
+	}
 
 	$effect(() => {
 		if (focusIndex !== null && inputRefs[focusIndex]) {
@@ -76,15 +94,20 @@
 
 	function getInputStyles(index) {
 		if (typeof inputStyles === 'string') return inputStyles;
-		if(Array.isArray(inputStyles)) return inputStyles[index];
+		if(Array.isArray(inputStyles)) return inputStyles[index]||'#1e1e1e';
+	}
+
+	function getInputFocusStyles(index) {
+		if (typeof inputFocusStyle === 'string') return inputFocusStyle;
+		if(Array.isArray(inputFocusStyle)) return inputFocusStyle[index]||'#1e1e1e';
 	}
 
 	function handleInputFocus(_, index) {
-		let prevIndex = focusIndex;
+		//let prevIndex = focusIndex;
 		focusIndex = index;
 		// setTimeout(()=>{
-			if (inputFocusStyle) inputRefs[focusIndex].style.cssText += `;${inputFocusStyle} !important;`;
-			if (inputFocusStyle) inputRefs[prevIndex].style.cssText += `;${inputFocusStyle} !important;`;
+		// 	if (inputFocusStyle) inputRefs[focusIndex].style.cssText += `;${inputFocusStyle} !important;`;
+		// 	if (inputFocusStyle) inputRefs[prevIndex].style.cssText += `;${getInputStyles(index)} !important;`;
 		// })
 	}
 
