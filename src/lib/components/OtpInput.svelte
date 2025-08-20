@@ -22,25 +22,7 @@
 
 	onMount(() => {
 		if (shouldAutoFocus) focusIndex = 0;
-		if(inputFocusStyle) {
-			for (let i = 0; i < numInputs; i++) {
-				inputRefs[i].addEventListener("focus", () => applyFocusStyle(inputRefs[i], getInputFocusStyles(i)));
-				inputRefs[i].addEventListener("blur", () => removeFocusStyle(inputRefs[i]));
-			}
-		}
 	});
-
-	function applyFocusStyle(el, style) {
-		el.dataset.prevStyle = el.style.cssText;
-		el.style.cssText += style;
-	}
-
-	function removeFocusStyle(el) {
-		if (el.dataset.prevStyle !== undefined) {
-			el.style.cssText = el.dataset.prevStyle;
-			delete el.dataset.prevStyle;
-		}
-	}
 
 	$effect(() => {
 		if (focusIndex !== null && inputRefs[focusIndex]) {
@@ -73,6 +55,18 @@
 
 	let isValidGroup = $derived((index) => groupHelper(group, numInputs).includes(index + 1));
 
+	function applyFocusStyle(el, style) {
+		el.dataset.prevStyle = el.style.cssText;
+		el.style.cssText += style;
+	}
+
+	function removeFocusStyle(el) {
+		if (el.dataset.prevStyle !== undefined) {
+			el.style.cssText = el.dataset.prevStyle;
+			delete el.dataset.prevStyle;
+		}
+	}
+
 	function getInputType(index) {
 		if (typeof inputType === 'string') return inputType;
 		if (Array.isArray(inputType)) return inputType[index] ?? 'text';
@@ -103,12 +97,16 @@
 	}
 
 	function handleInputFocus(_, index) {
-		//let prevIndex = focusIndex;
 		focusIndex = index;
-		// setTimeout(()=>{
-		// 	if (inputFocusStyle) inputRefs[focusIndex].style.cssText += `;${inputFocusStyle} !important;`;
-		// 	if (inputFocusStyle) inputRefs[prevIndex].style.cssText += `;${getInputStyles(index)} !important;`;
-		// })
+		if(inputFocusStyle) {
+			applyFocusStyle(inputRefs[focusIndex], getInputFocusStyles(focusIndex));
+		}
+	}
+
+	function handleInputBlur(event, index) {
+		if(inputFocusStyle) {
+			removeFocusStyle(inputRefs[index]);
+		}
 	}
 
 	function handleInputPaste(event, index) {
@@ -265,10 +263,20 @@
 								: handleInputFocus(e, index - 1);
 							break;
 						case 'ArrowLeft':
-							index > 0 ? handleInputFocus(e, index - 1) : e.preventDefault();
+							if(index > 0) {
+								handleInputFocus(e, index - 1)
+								handleInputBlur(e, index);
+							} else {
+								e.preventDefault()
+							}
 							break;
 						case 'ArrowRight':
-							index < numInputs - 1 ? handleInputFocus(e, index + 1) : e.preventDefault();
+							if(index < numInputs - 1) {
+								handleInputFocus(e, index + 1)
+								handleInputBlur(e, index);
+							} else {
+								e.preventDefault()
+							}
 							break;
 						case 'ArrowUp':
 						case 'ArrowDown':
@@ -280,6 +288,7 @@
 				}}
 				oninput={(e) => handleInputChange(e, index)}
 				onfocus={(e) => handleInputFocus(e, index)}
+				onblur={(e) => handleInputBlur(e, index)}
 				onpaste={(e) => handleInputPaste(e, index)}
 			/>
 			{@render renderSeparator(index)}
