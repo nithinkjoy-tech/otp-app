@@ -34,26 +34,23 @@
 	});
 
 	$effect(() => {
-		let groupSum = group?.reduce((acc, curr) => acc + curr);
-		if (groupSum !== numInputs) throw new Error('Sum of groups must be equal to numInputs');
+		if (group) {
+			let groupSum = group.reduce((acc, curr) => acc + curr);
+			if (groupSum !== numInputs) throw new Error('Sum of groups must be equal to numInputs');
+		}
 	});
 
-	let groupHelper = $derived((group, numInputs) => {
-		if (
-			!Array.isArray(group) ||
+	let groupHelper = $derived(() => {
+		if (!group || !Array.isArray(group) ||
 			!group.every(Number.isInteger) ||
-			group.reduce((sum, n) => sum + n, 0) !== numInputs
-		) {
+			group.reduce((sum, n) => sum + n, 0) !== numInputs) {
 			return [];
 		}
-
 		return group.reduce((arr, n) => {
 			arr.push((arr.at(-1) || 0) + n);
 			return arr;
 		}, []);
 	});
-
-	let isValidGroup = $derived((index) => groupHelper(group, numInputs).includes(index + 1));
 
 	function applyFocusStyle(el, style) {
 		el.dataset.prevStyle = el.style.cssText;
@@ -80,10 +77,6 @@
 			event.key === 'deleteContentCut';
 
 		focusIndex = isDelete ? index - 1 : Math.min(index + 1, numInputs - 1);
-
-		if (focusIndex === numInputs - 1) {
-			setTimeout(() => inputRefs[focusIndex]?.select());
-		}
 	}
 
 	function getInputStyles(index) {
@@ -209,7 +202,7 @@
 </script>
 
 {#snippet renderSeparator(index)}
-	{@const validGroup = isValidGroup(index)}
+	{@const validGroup = groupHelper().includes(index + 1)}
 	{@const sep = Array.isArray(separator) ? separator[index] : separator}
 
 	{#if index !== numInputs - 1}
@@ -264,16 +257,14 @@
 							break;
 						case 'ArrowLeft':
 							if(index > 0) {
-								handleInputFocus(e, index - 1)
-								handleInputBlur(e, index);
+								focusIndex = index - 1;
 							} else {
 								e.preventDefault()
 							}
 							break;
 						case 'ArrowRight':
 							if(index < numInputs - 1) {
-								handleInputFocus(e, index + 1)
-								handleInputBlur(e, index);
+								focusIndex = index + 1;
 							} else {
 								e.preventDefault()
 							}
