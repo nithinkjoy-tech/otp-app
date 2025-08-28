@@ -151,8 +151,10 @@
 	function validateInput(e, index, _inputType = 'text') {
 		if (typeof _inputType === 'string') {
 			if (_inputType === 'number') {
-				if (isInvalidNumberKey(e.key)) {
-					e.preventDefault();
+				if (!((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v")) {
+					if (isInvalidNumberKey(e.key)) {
+						e.preventDefault();
+					}
 				}
 			} else if (_inputType === 'alnum') {
 				if (!/^[a-zA-Z0-9]$/.test(e.key)) {
