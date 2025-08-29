@@ -1,16 +1,11 @@
 <script>
-	// mixed input type
-	// mixed separator
-	// separator for some intervals
-	// invalid group error
 	import OtpInput from '$lib/components/OtpInput.svelte';
 	let numInputs = $state(9);
 	let placeholder = $state('1111');
-	// let inputType = $state('tel');
 	let separator = $state(separatorSnippet);
 	let groupSeparator = $state(groupSeparatorSnippet);
 	let group = $state([3, 2, 4]);
-	let isError = $state(false);
+	let isError = $state(true);
 	let inputType = $state([
 		'number',
 		'text',
@@ -35,9 +30,20 @@
 	border: 2px solid pink;
 	`
 
+	let inputErrorStyle = [
+		`border: 2px solid purple;`,
+		`border: 2px solid pink;`,
+		`border: 2px solid blue;`,
+		`border: 2px solid brown;`
+	]
+
 	let containerStyles = `
 		gap: unset;
 	`;
+
+	let focusIndex = $state(null);
+	let inputRefs = $state(Array(numInputs).fill(null));
+	let inputValues = $state(Array(numInputs).fill(''));
 
 	function onChange(event) {
 		console.log('onChange clalled', event);
@@ -56,9 +62,13 @@
 	<OtpInput
 		showInput={true}
 		{group}
+		{focusIndex}
+		bind:inputRefs = {inputRefs}
+		bind:inputValues = {inputValues}
 		{containerStyles}
 		{inputStyles}
 		{inputFocusStyle}
+		{inputErrorStyle}
 		{groupSeparator}
 		{numInputs}
 		{onChange}

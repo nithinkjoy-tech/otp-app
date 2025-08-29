@@ -13,12 +13,12 @@
 		isError = false,
 		containerStyles = ``,
 		inputStyles = ``,
-		inputFocusStyle = ``
+		inputFocusStyle = ``,
+		inputErrorStyle = ``,
+		focusIndex,
+		inputRefs,
+		inputValues,
 	} = $props();
-
-	let focusIndex = $state(null);
-	let inputRefs = $state(Array(numInputs).fill(null));
-	let inputValues = $state(Array(numInputs).fill(''));
 
 	onMount(() => {
 		if (shouldAutoFocus) focusIndex = 0;
@@ -80,6 +80,7 @@
 	}
 
 	function getInputStyles(index) {
+		if (isError && inputErrorStyle) return getInputErrorStyle(index);
 		if (typeof inputStyles === 'string') return inputStyles;
 		if(Array.isArray(inputStyles)) return inputStyles[index]||'#1e1e1e';
 	}
@@ -87,6 +88,12 @@
 	function getInputFocusStyles(index) {
 		if (typeof inputFocusStyle === 'string') return inputFocusStyle;
 		if(Array.isArray(inputFocusStyle)) return inputFocusStyle[index]||'#1e1e1e';
+	}
+
+	function getInputErrorStyle(index) {
+		if (typeof inputErrorStyle === 'string') return inputErrorStyle;
+		if(Array.isArray(inputErrorStyle)) return inputErrorStyle[index]||'red';
+		throw new Error('inputErrorStyle must be a string or array of strings');
 	}
 
 	function handleInputFocus(_, index) {
@@ -150,57 +157,58 @@
 
 	function validateInput(e, index, _inputType = 'text') {
 		if (typeof _inputType === 'string') {
-			if (_inputType === 'number') {
-				if (!((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v")) {
-					if (isInvalidNumberKey(e.key)) {
+			const key = e.key;
+
+			switch (_inputType) {
+				case 'number':
+					if (!((e.ctrlKey || e.metaKey) && key.toLowerCase() === "v") && isInvalidNumberKey(key)) {
 						e.preventDefault();
 					}
-				}
-			} else if (_inputType === 'alnum') {
-				if (!/^[a-zA-Z0-9]$/.test(e.key)) {
-					e.preventDefault();
-				}
-			} else if (_inputType === 'uppercase') {
-				if (!/^[a-zA-Z]$/.test(e.key)) {
-					e.preventDefault();
-					return;
-				}
-				if (/^[a-z]$/.test(e.key)) {
-					transformCase(e, e.key.toUpperCase());
-				}
-			} else if (_inputType === 'lowercase') {
-				if (!/^[a-zA-Z]$/.test(e.key)) {
-					e.preventDefault();
-					return;
-				}
-				if (/^[A-Z]$/.test(e.key)) {
-					transformCase(e, e.key.toLowerCase());
-				}
-			} else if (_inputType === 'upper-alnum') {
-				if (!/^[a-zA-Z0-9]$/.test(e.key)) {
-					e.preventDefault();
-					return;
-				}
-				if (/^[a-z]$/.test(e.key)) {
-					transformCase(e, e.key.toUpperCase());
-				}
-			} else if (_inputType === 'lower-alnum') {
-				if (!/^[a-zA-Z0-9]$/.test(e.key)) {
-					e.preventDefault();
-					return;
-				}
-				if (/^[A-Z]$/.test(e.key)) {
-					transformCase(e, e.key.toLowerCase());
-				}
+					break;
+
+				case 'alnum':
+					if (!/^[a-zA-Z0-9]$/.test(key)) e.preventDefault();
+					break;
+
+				case 'uppercase':
+					if (!/^[a-zA-Z]$/.test(key)) {
+						e.preventDefault();
+					} else if (/^[a-z]$/.test(key)) {
+						transformCase(e, key.toUpperCase());
+					}
+					break;
+
+				case 'lowercase':
+					if (!/^[a-zA-Z]$/.test(key)) {
+						e.preventDefault();
+					} else if (/^[A-Z]$/.test(key)) {
+						transformCase(e, key.toLowerCase());
+					}
+					break;
+
+				case 'upper-alnum':
+					if (!/^[a-zA-Z0-9]$/.test(key)) {
+						e.preventDefault();
+					} else if (/^[a-z]$/.test(key)) {
+						transformCase(e, key.toUpperCase());
+					}
+					break;
+
+				case 'lower-alnum':
+					if (!/^[a-zA-Z0-9]$/.test(key)) {
+						e.preventDefault();
+					} else if (/^[A-Z]$/.test(key)) {
+						transformCase(e, key.toLowerCase());
+					}
+					break;
 			}
 		} else if (Array.isArray(_inputType)) {
 			validateInput(e, index, _inputType[index]);
 		} else if (_inputType instanceof RegExp) {
-			if (!_inputType.test(e.key)) {
-				e.preventDefault();
-			}
+			if (!_inputType.test(e.key)) e.preventDefault();
 		}
 	}
+
 </script>
 
 {#snippet renderSeparator(index)}
@@ -248,8 +256,10 @@
 						inputValues[index] = v?.toString()?.substring(0, 1);
 					}
 				}
+				autoComplete='off'
 				maxlength="1"
 				placeholder={ph}
+				aria-label={`Please enter OTP character ${index + 1}`}
 				onkeydown={(e) => {
 					switch (e.key) {
 						case 'Backspace':
@@ -294,34 +304,34 @@
         outline: none;
     }
 
-	.otp-input-lib-container {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		gap: 8px;
-	}
+    .otp-input-lib-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
 
-	.single-otp-input {
-		height: 60px;
-		width: 60px;
-		border-radius: 5px;
-		text-align: center;
-		font-size: 40px;
-		line-height: 60px;
-		margin: 0 12px;
-		border: 2px solid #6f6e6c;
-		box-sizing: border-box;
-		-moz-appearance: textfield;
-		appearance: textfield;
-	}
+    .single-otp-input {
+        height: 60px;
+        width: 60px;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 40px;
+        line-height: 60px;
+        margin: 0 12px;
+        border: 2px solid #6f6e6c;
+        box-sizing: border-box;
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
 
-	.otp-input-error {
-			border: 2px solid red;
-	}
+    .otp-input-error {
+        border: 2px solid red;
+    }
 
-	.single-otp-input::-webkit-inner-spin-button,
-	.single-otp-input::-webkit-outer-spin-button {
-		-webkit-appearance: none;
-		margin: 0;
-	}
+    .single-otp-input::-webkit-inner-spin-button,
+    .single-otp-input::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 </style>
