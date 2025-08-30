@@ -45,8 +45,28 @@
 	let inputRefs = $state(Array(numInputs).fill(null));
 	let inputValues = $state(Array(numInputs).fill(''));
 
-	function onChange(event) {
-		console.log('onChange clalled', event);
+	function onChange(input, event, index) {
+		console.log('onChange clalled', event, index);
+	}
+
+	function keyDown(event, index) {
+			console.log('keyDown clalled', event, index);
+	}
+
+	function onInput(event, index) {
+
+	}
+
+	function onFocus(event, index) {
+
+	}
+
+	function onBlur(event, index) {
+
+	}
+
+	function onPaste(event, index) {
+
 	}
 </script>
 
@@ -77,6 +97,11 @@
 		{inputType}
 		{separator}
 		{isError}
+		keyDown={[keyDown, "after"]}
+		onInput={[onInput, "after"]}
+		onFocus={[onFocus, "after"]}
+		onBlur={[onBlur, "after"]}
+		onPaste={[onPaste, "after"]}
 	></OtpInput>
 </div>
 
