@@ -34,79 +34,89 @@
 		onPaste,
 	} = $props();
 
-	class OnInputClass {
-		constructor() { }
+	class EventHandler {
+		constructor(eventName) {
+			this.eventName = eventName;
+		}
 
-		defaultOnInput(event, index) {
+		_handle(event, index, config) {
+			if (Array.isArray(config)) {
+				const [fn, mode] = config;
+
+				if (typeof fn !== "function") {
+					throw new TypeError(
+						`Expected '${this.eventName}' array's first index to be a function, but got ${typeof fn}`
+					);
+				}
+
+				switch (mode) {
+					case "before":
+						fn(event, index);
+						this.defaultHandler(event, index);
+						break;
+					case "after":
+						this.defaultHandler(event, index);
+						fn(event, index);
+						break;
+					case "replace":
+						fn(event, index);
+						break;
+					default:
+						throw new TypeError(
+							`Expected '${this.eventName}' array's second index to be one of: before, after, replace, but got ${mode}`
+						);
+				}
+			} else if (config) {
+				throw new TypeError(
+					`Expected '${this.eventName}' to be an array, but got ${typeof config}`
+				);
+			} else {
+				this.defaultHandler(event, index);
+			}
+		}
+	}
+
+	class OnInputClass extends EventHandler {
+		constructor() {
+			super("onInput");
+		}
+
+		defaultHandler(event, index) {
 			const isDelete =
-				event.inputType === 'deleteContentBackward' ||
-				event.key === 'Backspace' ||
-				event.key === 'deleteContentCut';
+				event.inputType === "deleteContentBackward" ||
+				event.key === "Backspace" ||
+				event.key === "deleteContentCut";
 
 			focusIndex = isDelete ? index - 1 : Math.min(index + 1, numInputs - 1);
 		}
 
 		handleOnInput(event, index) {
-			if (Array.isArray(onInput)) {
-				if (!typeof onInput[0] === 'function') {
-					throw new TypeError(
-						"Expected 'onInput' array's first index to be a function, but got " + typeof onInput[0]
-					);
-				}
-				switch (onInput[1]) {
-					case 'before':
-						onInput[0](event, index);
-						this.defaultOnInput(event, index);
-						break;
-					case 'after':
-						this.defaultOnInput(event, index);
-						onInput[0](event, index);
-						break;
-					case 'replace':
-						onInput[0](event, index);
-						break;
-					default:
-						throw new TypeError(
-							"Expected 'onInput' array's second index to be one of the following: " +
-							'before, after, replace, but got ' +
-							onInput[1]
-						);
-				}
-			} else if (onInput) {
-				throw new TypeError("Expected 'keyDown' to be an array, but got " + typeof onInput);
-			} else {
-				this.defaultOnInput(event, index);
-			}
+			this._handle(event, index, onInput);
 		}
 	}
 
-	class KeyDownClass {
-		constructor() { }
+	class KeyDownClass extends EventHandler {
+		constructor() {
+			super("keyDown");
+		}
 
-		defaultKeydown(event, index) {
-			console.log('default keydown runnign');
+		defaultHandler(event, index) {
 			switch (event.key) {
-				case 'Backspace':
+				case "Backspace":
 					inputRefs[index].value
-						? onInputInstance.handleOnInput(event, index - 1)
-						: onFocusInstance.handleInputFocus(event, index - 1);
+						? onInputInstance.handleOnInput(event, index)
+						: onFocusInstance.handleInputFocus(event, index);
 					break;
-				case 'ArrowLeft':
-					if (index > 0) {
-						focusIndex = index - 1;
-					} else {
-						event.preventDefault();
-					}
+				case "ArrowLeft":
+					focusIndex = index > 0 ? index - 1 : index;
+					if (index === 0) event.preventDefault();
 					break;
-				case 'ArrowRight':
-					if (index < numInputs - 1) {
-						focusIndex = index + 1;
-					} else {
-						event.preventDefault();
-					}
+				case "ArrowRight":
+					focusIndex = index < numInputs - 1 ? index + 1 : index;
+					if (index === numInputs - 1) event.preventDefault();
 					break;
-				case 'ArrowUp':
-				case 'ArrowDown':
+				case "ArrowUp":
+				case "ArrowDown":
 					event.preventDefault();
 					break;
 				default:
@@ -115,146 +125,69 @@
 		}
 
 		handleKeyDown(event, index) {
-			if (Array.isArray(keyDown)) {
-				if (!typeof keyDown[0] === 'function') {
-					throw new TypeError(
-						"Expected 'keyDown' array's first index to be a function, but got " + typeof keyDown[0]
-					);
-				}
-				switch (keyDown[1]) {
-					case 'before':
-						keyDown[0](event, index);
-						this.defaultKeydown(event, index);
-						break;
-					case 'after':
-						this.defaultKeydown(event, index);
-						keyDown[0](event, index);
-						break;
-					case 'replace':
-						keyDown[0](event, index);
-						break;
-					default:
-						throw new TypeError(
-							"Expected 'keyDown' array's second index to be one of the following: " +
-							'before, after, replace, but got ' +
-							keyDown[1]
-						);
-				}
-			} else if (keyDown) {
-				throw new TypeError("Expected 'keyDown' to be an array, but got " + typeof keyDown);
-			} else {
-				this.defaultKeydown(event, index);
-			}
+			this._handle(event, index, keyDown);
 		}
 	}
 
-	class OnFocusClass {
-		constructor() { }
+	class OnFocusClass extends EventHandler {
+		constructor() {
+			super("onFocus");
+		}
 
-		defaultOnFocus(event, index) {
+		defaultHandler(event, index) {
 			focusIndex = index;
 			if (inputFocusStyle) {
-				applyFocusStyle(inputRefs[focusIndex], getInputFocusStyles(inputFocusStyle, focusIndex));
+				applyFocusStyle(
+					inputRefs[focusIndex],
+					getInputFocusStyles(inputFocusStyle, focusIndex)
+				);
 			}
 		}
 
 		handleInputFocus(event, index) {
-			if (Array.isArray(onFocus)) {
-				if (!typeof onFocus[0] === 'function') {
-					throw new TypeError(
-						"Expected 'onFocus' array's first index to be a function, but got " + typeof onFocus[0]
-					);
-				}
-				switch (onFocus[1]) {
-					case 'before':
-						onFocus[0](event, index);
-						this.defaultOnFocus(event, index);
-						break;
-					case 'after':
-						this.defaultOnFocus(event, index);
-						onFocus[0](event, index);
-						break;
-					case 'replace':
-						onFocus[0](event, index);
-						break;
-					default:
-						throw new TypeError(
-							"Expected 'onInput' array's second index to be one of the following: " +
-							'before, after, replace, but got ' +
-							onFocus[1]
-						);
-				}
-			} else if (onFocus) {
-				throw new TypeError("Expected 'keyDown' to be an array, but got " + typeof onInput);
-			} else {
-				this.defaultOnFocus(event, index);
-			}
+			this._handle(event, index, onFocus);
 		}
 	}
 
-	class OnBlurClass {
-		constructor() { }
+	class OnBlurClass extends EventHandler {
+		constructor() {
+			super("onBlur");
+		}
 
-		defaultOnBlur(event, index) {
+		defaultHandler(event, index) {
 			if (inputFocusStyle) {
 				removeFocusStyle(inputRefs[index]);
 			}
 		}
 
 		handleInputBlur(event, index) {
-			if (Array.isArray(onBlur)) {
-				if (!typeof onBlur[0] === 'function') {
-					throw new TypeError(
-						"Expected 'onBlur' array's first index to be a function, but got " + typeof onBlur[0]
-					);
-				}
-				switch (onBlur[1]) {
-					case 'before':
-						onBlur[0](event, index);
-						this.defaultOnBlur(event, index);
-						break;
-					case 'after':
-						this.defaultOnBlur(event, index);
-						onBlur[0](event, index);
-						break;
-					case 'replace':
-						onBlur[0](event, index);
-						break;
-					default:
-						throw new TypeError(
-							"Expected 'onBlur' array's second index to be one of the following: " +
-							'before, after, replace, but got ' +
-							onBlur[1]
-						);
-				}
-			} else if (onBlur) {
-				throw new TypeError("Expected 'keyDown' to be an array, but got " + typeof onInput);
-			} else {
-				this.defaultOnBlur(event, index);
-			}
+			this._handle(event, index, onBlur);
 		}
 	}
 
-	class OnPasteClass {
-		constructor() { }
+	class OnPasteClass extends EventHandler {
+		constructor() {
+			super("onPaste");
+		}
 
-		defaultOnPaste(event, index) {
+		defaultHandler(event, index) {
+			console.log("default handler get called")
 			event.preventDefault();
-			const pastedData = event.clipboardData.getData('text/plain').slice(0, numInputs).split('');
+			const pastedData = event.clipboardData
+				.getData("text/plain")
+				.slice(0, numInputs)
+				.split("");
 
-			// Prevent pasting if the clipboard data contains non-numeric values for number inputs
-			if (inputType === 'number' && pastedData.some((value) => isNaN(Number(value)))) return;
+			if (inputType === "number" && pastedData.some((v) => isNaN(Number(v)))) return;
 
 			const totalPastedChars = pastedData.length;
-
-			// If the user is pasting data in the middle of the input, check whether previous inputs are empty and fill them with pasted data
 			const hasNonEmptyInput = inputValues.slice(0, index).some(Boolean);
 			const startPos = !hasNonEmptyInput ? 0 : index;
 			const endPos = Math.min(numInputs, startPos + totalPastedChars);
 
 			for (let pos = startPos; pos < endPos; pos++) {
 				if (pastedData.length > 0) {
-					inputValues[pos] = pastedData.shift() ?? '';
+					inputValues[pos] = pastedData.shift() ?? "";
 					focusIndex = Math.min(numInputs - 1, pos + 1);
 				} else {
 					break;
@@ -263,44 +196,15 @@
 		}
 
 		handleInputPaste(event, index) {
-			if (Array.isArray(onPaste)) {
-				if (!typeof onPaste[0] === 'function') {
-					throw new TypeError(
-						"Expected 'onPaste' array's first index to be a function, but got " + typeof onPaste[0]
-					);
-				}
-				switch (onPaste[1]) {
-					case 'before':
-						onPaste[0](event, index);
-						this.defaultOnPaste(event, index);
-						break;
-					case 'after':
-						this.defaultOnPaste(event, index);
-						onPaste[0](event, index);
-						break;
-					case 'replace':
-						onPaste[0](event, index);
-						break;
-					default:
-						throw new TypeError(
-							"Expected 'onPaste' array's second index to be one of the following: " +
-							'before, after, replace, but got ' +
-							onPaste[1]
-						);
-				}
-			} else if (onPaste) {
-				throw new TypeError("Expected 'keyDown' to be an array, but got " + typeof onPaste);
-			} else {
-				this.defaultOnPaste(event, index);
-			}
+			this._handle(event, index, onPaste);
 		}
 	}
 
-	let onPasteInstance = new OnPasteClass();
-	let onBlurInstance = new OnBlurClass();
-	let onFocusInstance = new OnFocusClass();
-	let onInputInstance = new OnInputClass();
-	let keyDownInstance = new KeyDownClass();
+	const onInputInstance = new OnInputClass();
+	const keyDownInstance = new KeyDownClass();
+	const onFocusInstance = new OnFocusClass();
+	const onBlurInstance = new OnBlurClass();
+	const onPasteInstance = new OnPasteClass();
 
 	onMount(() => {
 		if (shouldAutoFocus) focusIndex = 0;
