@@ -143,11 +143,11 @@
 				autoComplete="off"
 				placeholder={ph}
 				aria-label={`Please enter OTP character ${index + 1}`}
-				onkeydown={(e) => keyDownInstance.handleKeyDown(e, index)}
-				oninput={(e) => onInputInstance.handleOnInput(e, index)}
-				onfocus={(e) => onFocusInstance.handleInputFocus(e, index)}
-				onblur={(e) => onBlurInstance.handleInputBlur(e, index)}
-				onpaste={(e) => onPasteInstance.handleInputPaste(e, index)}
+				onkeydown={(e) => keyDownInstance.handleKeyDown(e, index, keyDown)}
+				oninput={(e) => onInputInstance.handleOnInput(e, index, onInput)}
+				onfocus={(e) => onFocusInstance.handleInputFocus(e, index, onFocus)}
+				onblur={(e) => onBlurInstance.handleInputBlur(e, index, onBlur)}
+				onpaste={(e) => onPasteInstance.handleInputPaste(e, index, onPaste)}
 			/>
 			{@render renderSeparator(index)}
 		{/each}
