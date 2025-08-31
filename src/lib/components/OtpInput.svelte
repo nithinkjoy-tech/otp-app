@@ -10,6 +10,14 @@
 		validateInput
 	} from '../helpers/utils.js';
 
+	import {
+		OnInputClass,
+		KeyDownClass,
+		OnFocusClass,
+		OnBlurClass,
+		OnPasteClass,
+	} from '../helpers/eventHandlers.js';
+
 	let {
 		showInput,
 		inputType = 'number',
@@ -34,177 +42,22 @@
 		onPaste,
 	} = $props();
 
-	class EventHandler {
-		constructor(eventName) {
-			this.eventName = eventName;
-		}
+	// helper setter
+	const setFocusIndex = (i) => (focusIndex = i);
 
-		_handle(event, index, config) {
-			if (Array.isArray(config)) {
-				const [fn, mode] = config;
-
-				if (typeof fn !== "function") {
-					throw new TypeError(
-						`Expected '${this.eventName}' array's first index to be a function, but got ${typeof fn}`
-					);
-				}
-
-				switch (mode) {
-					case "before":
-						fn(event, index);
-						this.defaultHandler(event, index);
-						break;
-					case "after":
-						this.defaultHandler(event, index);
-						fn(event, index);
-						break;
-					case "replace":
-						fn(event, index);
-						break;
-					default:
-						throw new TypeError(
-							`Expected '${this.eventName}' array's second index to be one of: before, after, replace, but got ${mode}`
-						);
-				}
-			} else if (config) {
-				throw new TypeError(
-					`Expected '${this.eventName}' to be an array, but got ${typeof config}`
-				);
-			} else {
-				this.defaultHandler(event, index);
-			}
-		}
-	}
-
-	class OnInputClass extends EventHandler {
-		constructor() {
-			super("onInput");
-		}
-
-		defaultHandler(event, index) {
-			const isDelete =
-				event.inputType === "deleteContentBackward" ||
-				event.key === "Backspace" ||
-				event.key === "deleteContentCut";
-
-			focusIndex = isDelete ? index - 1 : Math.min(index + 1, numInputs - 1);
-		}
-
-		handleOnInput(event, index) {
-			this._handle(event, index, onInput);
-		}
-	}
-
-	class KeyDownClass extends EventHandler {
-		constructor() {
-			super("keyDown");
-		}
-
-		defaultHandler(event, index) {
-			switch (event.key) {
-				case "Backspace":
-					inputRefs[index].value
-						? onInputInstance.handleOnInput(event, index)
-						: onFocusInstance.handleInputFocus(event, index);
-					break;
-				case "ArrowLeft":
-					focusIndex = index > 0 ? index - 1 : index;
-					if (index === 0) event.preventDefault();
-					break;
-				case "ArrowRight":
-					focusIndex = index < numInputs - 1 ? index + 1 : index;
-					if (index === numInputs - 1) event.preventDefault();
-					break;
-				case "ArrowUp":
-				case "ArrowDown":
-					event.preventDefault();
-					break;
-				default:
-					validateInput(event, index, inputType);
-			}
-		}
-
-		handleKeyDown(event, index) {
-			this._handle(event, index, keyDown);
-		}
-	}
-
-	class OnFocusClass extends EventHandler {
-		constructor() {
-			super("onFocus");
-		}
-
-		defaultHandler(event, index) {
-			focusIndex = index;
-			if (inputFocusStyle) {
-				applyFocusStyle(
-					inputRefs[focusIndex],
-					getInputFocusStyles(inputFocusStyle, focusIndex)
-				);
-			}
-		}
-
-		handleInputFocus(event, index) {
-			this._handle(event, index, onFocus);
-		}
-	}
-
-	class OnBlurClass extends EventHandler {
-		constructor() {
-			super("onBlur");
-		}
-
-		defaultHandler(event, index) {
-			if (inputFocusStyle) {
-				removeFocusStyle(inputRefs[index]);
-			}
-		}
-
-		handleInputBlur(event, index) {
-			this._handle(event, index, onBlur);
-		}
-	}
-
-	class OnPasteClass extends EventHandler {
-		constructor() {
-			super("onPaste");
-		}
-
-		defaultHandler(event, index) {
-			console.log("default handler get called")
-			event.preventDefault();
-			const pastedData = event.clipboardData
-				.getData("text/plain")
-				.slice(0, numInputs)
-				.split("");
-
-			if (inputType === "number" && pastedData.some((v) => isNaN(Number(v)))) return;
-
-			const totalPastedChars = pastedData.length;
-			const hasNonEmptyInput = inputValues.slice(0, index).some(Boolean);
-			const startPos = !hasNonEmptyInput ? 0 : index;
-			const endPos = Math.min(numInputs, startPos + totalPastedChars);
-
-			for (let pos = startPos; pos < endPos; pos++) {
-				if (pastedData.length > 0) {
-					inputValues[pos] = pastedData.shift() ?? "";
-					focusIndex = Math.min(numInputs - 1, pos + 1);
-				} else {
-					break;
-				}
-			}
-		}
-
-		handleInputPaste(event, index) {
-			this._handle(event, index, onPaste);
-		}
-	}
-
-	const onInputInstance = new OnInputClass();
-	const keyDownInstance = new KeyDownClass();
-	const onFocusInstance = new OnFocusClass();
-	const onBlurInstance = new OnBlurClass();
-	const onPasteInstance = new OnPasteClass();
+	// instantiate handlers
+	const onInputInstance = new OnInputClass({ numInputs, setFocusIndex });
+	const onFocusInstance = new OnFocusClass({ inputRefs, inputFocusStyle, setFocusIndex });
+	const onBlurInstance = new OnBlurClass({ inputRefs, inputFocusStyle });
+	const onPasteInstance = new OnPasteClass({ numInputs, inputValues, setFocusIndex, inputType });
+	const keyDownInstance = new KeyDownClass({
+		numInputs,
+		inputRefs,
+		setFocusIndex,
+		onInputInstance,
+		onFocusInstance,
+		inputType
+	});
 
 	onMount(() => {
 		if (shouldAutoFocus) focusIndex = 0;

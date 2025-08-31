@@ -1,0 +1,190 @@
+import {
+	applyFocusStyle,
+	getInputFocusStyles,
+	removeFocusStyle,
+	validateInput,
+} from './utils.js';
+
+export class EventHandler {
+	constructor(eventName) {
+		this.eventName = eventName;
+	}
+
+	_handle(event, index, config) {
+		if (Array.isArray(config)) {
+			const [fn, mode] = config;
+
+			if (typeof fn !== 'function') {
+				throw new TypeError(
+					`Expected '${this.eventName}' array's first index to be a function, but got ${typeof fn}`
+				);
+			}
+
+			switch (mode) {
+				case 'before':
+					fn(event, index);
+					this.defaultHandler(event, index);
+					break;
+				case 'after':
+					this.defaultHandler(event, index);
+					fn(event, index);
+					break;
+				case 'replace':
+					fn(event, index);
+					break;
+				default:
+					throw new TypeError(
+						`Expected '${this.eventName}' array's second index to be one of: before, after, replace, but got ${mode}`
+					);
+			}
+		} else if (config) {
+			throw new TypeError(
+				`Expected '${this.eventName}' to be an array, but got ${typeof config}`
+			);
+		} else {
+			this.defaultHandler(event, index);
+		}
+	}
+}
+
+export class OnInputClass extends EventHandler {
+	constructor({ numInputs, setFocusIndex }) {
+		super('onInput');
+		this.numInputs = numInputs;
+		this.setFocusIndex = setFocusIndex;
+	}
+
+	defaultHandler(event, index) {
+		const isDelete =
+			event.inputType === 'deleteContentBackward' ||
+			event.key === 'Backspace' ||
+			event.key === 'deleteContentCut';
+
+		this.setFocusIndex(
+			isDelete ? index - 1 : Math.min(index + 1, this.numInputs - 1)
+		);
+	}
+
+	handleOnInput(event, index, onInput) {
+		this._handle(event, index, onInput);
+	}
+}
+
+export class KeyDownClass extends EventHandler {
+	constructor({ numInputs, inputRefs, setFocusIndex, onInputInstance, onFocusInstance, inputType }) {
+		super('keyDown');
+		this.numInputs = numInputs;
+		this.inputRefs = inputRefs;
+		this.setFocusIndex = setFocusIndex;
+		this.onInputInstance = onInputInstance;
+		this.onFocusInstance = onFocusInstance;
+		this.inputType = inputType;
+	}
+
+	defaultHandler(event, index) {
+		switch (event.key) {
+			case 'Backspace':
+				this.inputRefs[index].value
+					? this.onInputInstance.handleOnInput(event, index)
+					: this.onFocusInstance.handleInputFocus(event, index);
+				break;
+			case 'ArrowLeft':
+				this.setFocusIndex(index > 0 ? index - 1 : index);
+				if (index === 0) event.preventDefault();
+				break;
+			case 'ArrowRight':
+				this.setFocusIndex(index < this.numInputs - 1 ? index + 1 : index);
+				if (index === this.numInputs - 1) event.preventDefault();
+				break;
+			case 'ArrowUp':
+			case 'ArrowDown':
+				event.preventDefault();
+				break;
+			default:
+				validateInput(event, index, this.inputType);
+		}
+	}
+
+	handleKeyDown(event, index, keyDown) {
+		this._handle(event, index, keyDown);
+	}
+}
+
+export class OnFocusClass extends EventHandler {
+	constructor({ inputRefs, inputFocusStyle, setFocusIndex }) {
+		super('onFocus');
+		this.inputRefs = inputRefs;
+		this.inputFocusStyle = inputFocusStyle;
+		this.setFocusIndex = setFocusIndex;
+	}
+
+	defaultHandler(event, index) {
+		this.setFocusIndex(index);
+		if (this.inputFocusStyle) {
+			applyFocusStyle(
+				this.inputRefs[index],
+				getInputFocusStyles(this.inputFocusStyle, index)
+			);
+		}
+	}
+
+	handleInputFocus(event, index, onFocus) {
+		this._handle(event, index, onFocus);
+	}
+}
+
+export class OnBlurClass extends EventHandler {
+	constructor({ inputRefs, inputFocusStyle }) {
+		super('onBlur');
+		this.inputRefs = inputRefs;
+		this.inputFocusStyle = inputFocusStyle;
+	}
+
+	defaultHandler(event, index) {
+		if (this.inputFocusStyle) {
+			removeFocusStyle(this.inputRefs[index]);
+		}
+	}
+
+	handleInputBlur(event, index, onBlur) {
+		this._handle(event, index, onBlur);
+	}
+}
+
+export class OnPasteClass extends EventHandler {
+	constructor({ numInputs, inputValues, setFocusIndex, inputType }) {
+		super('onPaste');
+		this.numInputs = numInputs;
+		this.inputValues = inputValues;
+		this.setFocusIndex = setFocusIndex;
+		this.inputType = inputType;
+	}
+
+	defaultHandler(event, index) {
+		event.preventDefault();
+		const pastedData = event.clipboardData
+			.getData('text/plain')
+			.slice(0, this.numInputs)
+			.split('');
+
+		if (this.inputType === 'number' && pastedData.some((v) => isNaN(Number(v)))) return;
+
+		const totalPastedChars = pastedData.length;
+		const hasNonEmptyInput = this.inputValues.slice(0, index).some(Boolean);
+		const startPos = !hasNonEmptyInput ? 0 : index;
+		const endPos = Math.min(this.numInputs, startPos + totalPastedChars);
+
+		for (let pos = startPos; pos < endPos; pos++) {
+			if (pastedData.length > 0) {
+				this.inputValues[pos] = pastedData.shift() ?? '';
+				this.setFocusIndex(Math.min(this.numInputs - 1, pos + 1));
+			} else {
+				break;
+			}
+		}
+	}
+
+	handleInputPaste(event, index, onPaste) {
+		this._handle(event, index, onPaste);
+	}
+}
