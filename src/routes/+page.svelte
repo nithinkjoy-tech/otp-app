@@ -1,12 +1,12 @@
 <script>
 	import OtpInput from '$lib/components/OtpInput.svelte';
-	let numInputs = $state(9);
-	let placeholder = $state('1111');
+	let numInputs = 9;
+	let placeholder = '12345';
 	let separator = $state(separatorSnippet);
 	let groupSeparator = $state(groupSeparatorSnippet);
-	let group = $state([3, 2, 4]);
-	let isError = $state(true);
-	let inputType = $state([
+	let group = [3, 4, 2];
+	let isError = true;
+	let inputType = [
 		'number',
 		'text',
 		'upper-alnum',
@@ -15,7 +15,7 @@
 		'uppercase',
 		'lowercase',
 		/^[A-Za-z]+$/
-	]);
+	];
 	let shouldAutoFocus = true;
 
 	let inputStyles = [`
@@ -41,20 +41,17 @@
 		gap: unset;
 	`;
 
-	let focusIndex = $state(null);
-	let inputRefs = $state(Array(numInputs).fill(null));
-	let inputValues = $state(Array(numInputs).fill(''));
 
 	function onChange(input, event, index) {
 		console.log('onChange clalled', event, index);
 	}
 
 	function keyDown(event, index) {
-			console.log('keyDown clalled', event, index);
+		// console.log('keyDown clalled', event, index, inputRef);
 	}
 
 	function onInput(event, index) {
-
+		console.log('onInput clalled', event, index);
 	}
 
 	function onFocus(event, index) {
@@ -68,6 +65,15 @@
 	function onPaste(event, index) {
 
 	}
+
+	function onComplete(value) {
+		console.log('onComplete called', value);
+	}
+
+	let inputRef = $state(Array(numInputs).fill(null));
+	//let inputRef = "hel;lo";
+	let value = $state('');
+
 </script>
 
 {#snippet separatorSnippet()}
@@ -80,11 +86,9 @@
 
 <div id="app">
 	<OtpInput
-		showInput={true}
+		bind:inputRef = {inputRef}
+		bind:value = {value}
 		{group}
-		{focusIndex}
-		bind:inputRefs = {inputRefs}
-		bind:inputValues = {inputValues}
 		{containerStyles}
 		{inputStyles}
 		{inputFocusStyle}
@@ -102,11 +106,11 @@
 		onFocus={[onFocus, "after"]}
 		onBlur={[onBlur, "after"]}
 		onPaste={[onPaste, "after"]}
+		onComplete={onComplete}
 	></OtpInput>
 </div>
 
 <style>
-
 	.custom-separator {
 		display: flex;
 		align-items: center;
