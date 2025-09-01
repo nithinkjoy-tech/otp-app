@@ -24,13 +24,14 @@
 		inputFocusStyle = ``,
 		inputErrorStyle = ``,
 		inputRef,
-		value = '',
+		value = $bindable(''),
 		keyDown,
 		onInput,
 		onFocus,
 		onBlur,
 		onPaste,
-		onComplete
+		onComplete,
+		onEnter,
 	} = $props();
 
 	function getStatefulArray(inputRefs, numInputs) {
@@ -69,7 +70,9 @@
 		setFocusIndex,
 		onInputInstance,
 		onFocusInstance,
-		inputType
+		inputType,
+		onEnter,
+		getValue: () => value,
 	});
 
 	onMount(() => {
@@ -91,6 +94,14 @@
 			if (groupSum !== numInputs) throw new Error('Sum of groups must be equal to numInputs');
 		}
 	});
+
+	$effect(() => {
+		if (value === '') {
+			for (let i = 0; i < numInputs; i++) {
+				inputValues[i] = '';
+			}
+		}
+	})
 
 	$effect(() => {
 		value = inputValues.join('');

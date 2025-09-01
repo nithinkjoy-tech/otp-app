@@ -70,9 +70,19 @@
 		console.log('onComplete called', value);
 	}
 
+	function onEnter(value) {
+		console.log('onEnter called', value);
+	}
+
 	let inputRef = $state(Array(numInputs).fill(null));
 	//let inputRef = "hel;lo";
 	let value = $state('');
+
+	function clearOTP() {
+		value = '';
+		console.log('clearOTP called',inputRef);
+		inputRef[0].focus()
+	}
 
 </script>
 
@@ -107,7 +117,10 @@
 		onBlur={[onBlur, "after"]}
 		onPaste={[onPaste, "after"]}
 		onComplete={onComplete}
+		onEnter={onEnter}
 	></OtpInput>
+
+	<button onclick={()=>clearOTP()}>Clear OTP</button>
 </div>
 
 <style>

@@ -71,7 +71,7 @@ export class OnInputClass extends EventHandler {
 }
 
 export class KeyDownClass extends EventHandler {
-	constructor({ numInputs, inputRefs, setFocusIndex, onInputInstance, onFocusInstance, inputType }) {
+	constructor({ numInputs, inputRefs, setFocusIndex, onInputInstance, onFocusInstance, inputType, onEnter, getValue }) {
 		super('keyDown');
 		this.numInputs = numInputs;
 		this.inputRefs = inputRefs;
@@ -79,6 +79,8 @@ export class KeyDownClass extends EventHandler {
 		this.onInputInstance = onInputInstance;
 		this.onFocusInstance = onFocusInstance;
 		this.inputType = inputType;
+		this.onEnter = onEnter;
+		this.getValue = getValue;
 	}
 
 	defaultHandler(event, index) {
@@ -86,7 +88,19 @@ export class KeyDownClass extends EventHandler {
 			case 'Backspace':
 				this.inputRefs[index].value
 					? this.onInputInstance.handleOnInput(event, index)
-					: this.onFocusInstance.handleInputFocus(event, index);
+					: this.onFocusInstance.handleInputFocus(event, index - 1);
+				break;
+			case 'Enter':
+				if(this.onEnter) {
+					if(typeof this.onEnter === 'function') {
+						this.onEnter(this.getValue());
+					} else {
+						throw new TypeError('onEnter must be a function');
+					}
+				}
+				break;
+			case 'Tab':
+				this.defaultHandler({ ...event, key: 'ArrowRight' }, index);
 				break;
 			case 'ArrowLeft':
 				this.setFocusIndex(index > 0 ? index - 1 : index);
@@ -94,7 +108,9 @@ export class KeyDownClass extends EventHandler {
 				break;
 			case 'ArrowRight':
 				this.setFocusIndex(index < this.numInputs - 1 ? index + 1 : index);
-				if (index === this.numInputs - 1) event.preventDefault();
+				if (index === this.numInputs - 1) {
+					if ('preventDefault' in event) event.preventDefault();
+				}
 				break;
 			case 'ArrowUp':
 			case 'ArrowDown':
