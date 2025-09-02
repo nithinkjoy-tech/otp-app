@@ -176,8 +176,12 @@ export class OnPasteClass extends EventHandler {
 		this.inputType = inputType;
 	}
 
+	#allowPaste = true;
+
 	defaultHandler(event, index) {
+		console.log('paste',event);
 		event.preventDefault();
+		if(!this.#allowPaste) return;
 		const pastedData = event.clipboardData
 			.getData('text/plain')
 			.slice(0, this.numInputs)
@@ -187,7 +191,14 @@ export class OnPasteClass extends EventHandler {
 
 		const totalPastedChars = pastedData.length;
 		const hasNonEmptyInput = this.inputValues.slice(0, index).some(Boolean);
-		const startPos = !hasNonEmptyInput ? 0 : index;
+		//const startPos = !hasNonEmptyInput ? 0 : index;
+		let startPos = 0
+		if(hasNonEmptyInput) {
+			console.log('hasNonEmptyInput',this.inputValues);
+			if(!['V','v'].includes(this.inputValues[index])) {
+				startPos = index;
+			}
+		}
 		const endPos = Math.min(this.numInputs, startPos + totalPastedChars);
 
 		for (let pos = startPos; pos < endPos; pos++) {
@@ -200,7 +211,8 @@ export class OnPasteClass extends EventHandler {
 		}
 	}
 
-	handleInputPaste(event, index, onPaste) {
+	handleInputPaste(event, index, onPaste, allowPaste) {
+		this.#allowPaste = allowPaste;
 		this._handle(event, index, onPaste);
 	}
 }

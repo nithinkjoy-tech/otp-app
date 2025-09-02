@@ -32,6 +32,7 @@
 		onPaste,
 		onComplete,
 		onEnter,
+		allowPaste = true
 	} = $props();
 
 	function getStatefulArray(inputRefs, numInputs) {
@@ -180,11 +181,11 @@
 			autoComplete="off"
 			placeholder={ph}
 			aria-label={`Please enter OTP character ${index + 1}`}
-			onkeydown={(e) => keyDownInstance.handleKeyDown(e, index, keyDown)}
+			onkeydown={(e) => keyDownInstance.handleKeyDown(e, index, keyDown, allowPaste)}
 			oninput={(e) => onInputInstance.handleOnInput(e, index, onInput)}
 			onfocus={(e) => onFocusInstance.handleInputFocus(e, index, onFocus)}
 			onblur={(e) => onBlurInstance.handleInputBlur(e, index, onBlur)}
-			onpaste={(e) => onPasteInstance.handleInputPaste(e, index, onPaste)}
+			onpaste={(e) => onPasteInstance.handleInputPaste(e, index, onPaste, allowPaste)}
 		/>
 		{@render renderSeparator(index)}
 	{/each}

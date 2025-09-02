@@ -63,7 +63,9 @@
 	}
 
 	function onPaste(event, index) {
-
+		// console.log('onPaste clalled', event, index);
+		// alert('Pasting is not allowed');
+		// event.preventDefault();
 	}
 
 	function onComplete(value) {
@@ -118,6 +120,7 @@
 		onPaste={[onPaste, "after"]}
 		onComplete={onComplete}
 		onEnter={onEnter}
+		allowPaste={true}
 	></OtpInput>
 
 	<button onclick={()=>clearOTP()}>Clear OTP</button>
