@@ -3,6 +3,7 @@ import {
 	checkValidation,
 	getInputFocusStyles,
 	getInputType,
+	getValidInput,
 	removeFocusStyle,
 	validateInput
 } from './utils.js';
@@ -191,7 +192,7 @@ export class OnPasteClass extends EventHandler {
 
 		console.log({index,a:this.inputValues[index - 1]})
 		let si = index - 1;
-		if(this.inputValues[index - 1].toLowerCase() === 'v') {
+		if(this.inputValues[index - 1]?.toLowerCase() === 'v') {
 			console.log('its v')
 			this.inputValues[index - 1] = '';
 		} else {
@@ -207,8 +208,8 @@ export class OnPasteClass extends EventHandler {
 
 		for (let pos = startPos; pos < endPos; pos++) {
 			if (pastedData.length > 0) {
-				console.log({ipp:this.inputType[pos],pos})
-				let val = checkValidation(getInputType(this.inputType[pos]), pastedData.shift()) ?? ''
+				console.log({ipp:this.inputType[pos],pos,itypee:getInputType(this.inputType)})
+				let val = getValidInput(getInputType(this.inputType), pastedData.shift()) ?? ''
 				console.log({val})
 				this.inputValues[pos] = val;
 				this.setFocusIndex(Math.min(this.numInputs - 1, pos + 1));

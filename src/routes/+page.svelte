@@ -6,16 +6,17 @@
 	let groupSeparator = $state(groupSeparatorSnippet);
 	let group = [3, 4, 2];
 	let isError = true;
-	let inputType = [
-		'number',
-		'text',
-		'upper-alnum',
-		'lower-alnum',
-		'alnum',
-		'uppercase',
-		'lowercase',
-		/^[A-Za-z]+$/
-	];
+	// let inputType = [
+	// 	'number',
+	// 	'text',
+	// 	'upper-alnum',
+	// 	'lower-alnum',
+	// 	'alnum',
+	// 	'uppercase',
+	// 	'lowercase',
+	// 	/^[A-Za-z]+$/
+	// ];
+	let inputType = 'number';
 	let shouldAutoFocus = true;
 
 	let inputStyles = [`

@@ -11,6 +11,7 @@ export function removeFocusStyle(el) {
 }
 
 export function getInputType(inputType, index) {
+	console.log({ittt:inputType,a:typeof inputType})
 	if (typeof inputType === 'string') return inputType;
 	if (Array.isArray(inputType)) return inputType[index] ?? 'text';
 	return 'text';
@@ -56,104 +57,86 @@ export function transformCase(e, input) {
 }
 
 export function checkValidation(inputType, value) {
-	console.log({inputType, value})
 	if (typeof inputType === 'string') {
 		switch (inputType) {
 			case 'number':
-				if(!isInvalidNumberKey(value)) return value
-				break;
+				return !isInvalidNumberKey(value);
 
 			case 'alnum':
-				if(/^[a-zA-Z0-9]$/.test(value)) {
-					return value
-				}
-				break;
+				return /^[a-zA-Z0-9]$/.test(value);
 
 			case 'uppercase':
-				if (/^[a-zA-Z]$/.test(value)) {
-					return value.toUpperCase();
-				}
-				break;
-
 			case 'lowercase':
-				if (/^[a-zA-Z]$/.test(value)) {
-					return value.toLowerCase();
-				}
-				break;
+				return /^[a-zA-Z]$/.test(value);
 
 			case 'upper-alnum':
-				if (/^[a-zA-Z0-9]$/.test(value)) {
-					return value.toUpperCase();
-				}
-				break;
-
 			case 'lower-alnum':
-				if (/^[a-zA-Z0-9]$/.test(value)) {
-					return value.toLowerCase();
-				}
-				break;
+				return /^[a-zA-Z0-9]$/.test(value);
 
 			case 'text':
-				return value;
+				return true;
+
+			default:
+				return false;
 		}
 	} else if (inputType instanceof RegExp) {
-		if (inputType.test(value)) {
+		return inputType.test(value);
+	}
+
+	return false;
+}
+
+export function getValidInput(inputType, value) {
+	if (!checkValidation(inputType, value)) return '';
+
+	switch (inputType) {
+		case 'uppercase':
+		case 'upper-alnum':
+			return value.toUpperCase();
+
+		case 'lowercase':
+		case 'lower-alnum':
+			return value.toLowerCase();
+
+		case 'number':
+		case 'alnum':
+		case 'text':
 			return value;
-		}
+
+		default:
+			return '';
 	}
 }
 
+
 export function validateInput(e, index, _inputType = 'text') {
+	const key = e.key;
+
+	// handle array case
+	if (Array.isArray(_inputType)) {
+		return validateInput(e, index, _inputType[index]);
+	}
+
+	// handle regex case
+	if (_inputType instanceof RegExp) {
+		if (!_inputType.test(key)) e.preventDefault();
+		return;
+	}
+
 	if (typeof _inputType === 'string') {
-		const key = e.key;
-
-		switch (_inputType) {
-			case 'number':
-				if (!((e.ctrlKey || e.metaKey) && key.toLowerCase() === 'v') && isInvalidNumberKey(key)) {
-					console.log('prventing defaulttt');
-					e.preventDefault();
-				}
-				break;
-
-			case 'alnum':
-				if (!/^[a-zA-Z0-9]$/.test(key)) e.preventDefault();
-				break;
-
-			case 'uppercase':
-				if (!/^[a-zA-Z]$/.test(key)) {
-					e.preventDefault();
-				} else if (/^[a-z]$/.test(key)) {
-					transformCase(e, key.toUpperCase());
-				}
-				break;
-
-			case 'lowercase':
-				if (!/^[a-zA-Z]$/.test(key)) {
-					e.preventDefault();
-				} else if (/^[A-Z]$/.test(key)) {
-					transformCase(e, key.toLowerCase());
-				}
-				break;
-
-			case 'upper-alnum':
-				if (!/^[a-zA-Z0-9]$/.test(key)) {
-					e.preventDefault();
-				} else if (/^[a-z]$/.test(key)) {
-					transformCase(e, key.toUpperCase());
-				}
-				break;
-
-			case 'lower-alnum':
-				if (!/^[a-zA-Z0-9]$/.test(key)) {
-					e.preventDefault();
-				} else if (/^[A-Z]$/.test(key)) {
-					transformCase(e, key.toLowerCase());
-				}
-				break;
+		// allow Ctrl+V / Cmd+V for all input types
+		if ((e.ctrlKey || e.metaKey) && key.toLowerCase() === 'v') {
+			return;
 		}
-	} else if (Array.isArray(_inputType)) {
-		validateInput(e, index, _inputType[index]);
-	} else if (_inputType instanceof RegExp) {
-		if (!_inputType.test(e.key)) e.preventDefault();
+
+		if (!checkValidation(_inputType, key)) {
+			e.preventDefault();
+			return;
+		}
+
+		const transformed = getValidInput(_inputType, key);
+		if (transformed !== key) {
+			transformCase(e, transformed);
+		}
 	}
 }
