@@ -57,23 +57,95 @@
 	let inputValues = $state(Array(numInputs).fill(''));
 	let inputRefs = getStatefulArray(inputRef, numInputs);
 
-	// helper setter
+	// // helper setter
 	const setFocusIndex = (i) => (focusIndex = i);
+	//
+	//
+	// // instantiate handlers
+	// const onInputInstance = new OnInputClass({ numInputs, setFocusIndex });
+	// const onFocusInstance = new OnFocusClass({ inputRefs, inputFocusStyle, setFocusIndex });
+	// const onBlurInstance = new OnBlurClass({ inputRefs, inputFocusStyle });
+	// const onPasteInstance = new OnPasteClass({ numInputs, inputValues, setFocusIndex, inputType });
+	// const keyDownInstance = new KeyDownClass({
+	// 	numInputs,
+	// 	inputRefs,
+	// 	setFocusIndex,
+	// 	onInputInstance,
+	// 	onFocusInstance,
+	// 	inputType,
+	// 	onEnter,
+	// 	getValue: () => value,
+	// });
+	const onInputInstance = new OnInputClass({
+		get numInputs() {
+			return numInputs; // live access
+		},
+		get setFocusIndex() {
+			return setFocusIndex;
+		}
+	});
 
-	// instantiate handlers
-	const onInputInstance = new OnInputClass({ numInputs, setFocusIndex });
-	const onFocusInstance = new OnFocusClass({ inputRefs, inputFocusStyle, setFocusIndex });
-	const onBlurInstance = new OnBlurClass({ inputRefs, inputFocusStyle });
-	const onPasteInstance = new OnPasteClass({ numInputs, inputValues, setFocusIndex, inputType });
+	const onFocusInstance = new OnFocusClass({
+		get inputRefs() {
+			return inputRefs;
+		},
+		get inputFocusStyle() {
+			return inputFocusStyle;
+		},
+		get setFocusIndex() {
+			return setFocusIndex;
+		}
+	});
+
+	const onBlurInstance = new OnBlurClass({
+		get inputRefs() {
+			return inputRefs;
+		},
+		get inputFocusStyle() {
+			return inputFocusStyle;
+		}
+	});
+
+	const onPasteInstance = new OnPasteClass({
+		get numInputs() {
+			return numInputs;
+		},
+		get inputValues() {
+			return inputValues;
+		},
+		get setFocusIndex() {
+			return setFocusIndex;
+		},
+		get inputType() {
+			return inputType;
+		}
+	});
+
 	const keyDownInstance = new KeyDownClass({
-		numInputs,
-		inputRefs,
-		setFocusIndex,
-		onInputInstance,
-		onFocusInstance,
-		inputType,
-		onEnter,
-		getValue: () => value,
+		get numInputs() {
+			return numInputs;
+		},
+		get inputRefs() {
+			return inputRefs;
+		},
+		get setFocusIndex() {
+			return setFocusIndex;
+		},
+		get onInputInstance() {
+			return onInputInstance;
+		},
+		get onFocusInstance() {
+			return onFocusInstance;
+		},
+		get inputType() {
+			return inputType;
+		},
+		get onEnter() {
+			return onEnter;
+		},
+		get value() {        // ✅ now directly as getter
+			return value;
+		}
 	});
 
 	onMount(() => {
@@ -102,21 +174,21 @@
 				inputValues[i] = '';
 			}
 		}
-	})
+	});
 
 	$effect(() => {
 		value = inputValues.join('');
 	});
 
 	$effect(() => {
-		if(value.length === numInputs) {
-			if(typeof onComplete === 'function') {
+		if (value.length === numInputs) {
+			if (typeof onComplete === 'function') {
 				onComplete(value);
-			} else if(onComplete) {
+			} else if (onComplete) {
 				throw new Error('onComplete must be a function');
 			}
 		}
-	})
+	});
 
 	let groupHelper = $derived(() => {
 		if (

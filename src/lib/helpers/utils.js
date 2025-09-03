@@ -55,6 +55,54 @@ export function transformCase(e, input) {
 	});
 }
 
+export function checkValidation(inputType, value) {
+	console.log({inputType, value})
+	if (typeof inputType === 'string') {
+		switch (inputType) {
+			case 'number':
+				if(!isInvalidNumberKey(value)) return value
+				break;
+
+			case 'alnum':
+				if(/^[a-zA-Z0-9]$/.test(value)) {
+					return value
+				}
+				break;
+
+			case 'uppercase':
+				if (/^[a-zA-Z]$/.test(value)) {
+					return value.toUpperCase();
+				}
+				break;
+
+			case 'lowercase':
+				if (/^[a-zA-Z]$/.test(value)) {
+					return value.toLowerCase();
+				}
+				break;
+
+			case 'upper-alnum':
+				if (/^[a-zA-Z0-9]$/.test(value)) {
+					return value.toUpperCase();
+				}
+				break;
+
+			case 'lower-alnum':
+				if (/^[a-zA-Z0-9]$/.test(value)) {
+					return value.toLowerCase();
+				}
+				break;
+
+			case 'text':
+				return value;
+		}
+	} else if (inputType instanceof RegExp) {
+		if (inputType.test(value)) {
+			return value;
+		}
+	}
+}
+
 export function validateInput(e, index, _inputType = 'text') {
 	if (typeof _inputType === 'string') {
 		const key = e.key;
@@ -62,6 +110,7 @@ export function validateInput(e, index, _inputType = 'text') {
 		switch (_inputType) {
 			case 'number':
 				if (!((e.ctrlKey || e.metaKey) && key.toLowerCase() === 'v') && isInvalidNumberKey(key)) {
+					console.log('prventing defaulttt');
 					e.preventDefault();
 				}
 				break;

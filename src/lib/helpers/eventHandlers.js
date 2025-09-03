@@ -1,8 +1,10 @@
 import {
 	applyFocusStyle,
+	checkValidation,
 	getInputFocusStyles,
+	getInputType,
 	removeFocusStyle,
-	validateInput,
+	validateInput
 } from './utils.js';
 
 export class EventHandler {
@@ -179,9 +181,7 @@ export class OnPasteClass extends EventHandler {
 	#allowPaste = true;
 
 	defaultHandler(event, index) {
-		console.log('paste',event);
 		event.preventDefault();
-		if(!this.#allowPaste) return;
 		const pastedData = event.clipboardData
 			.getData('text/plain')
 			.slice(0, this.numInputs)
@@ -189,21 +189,28 @@ export class OnPasteClass extends EventHandler {
 
 		if (this.inputType === 'number' && pastedData.some((v) => isNaN(Number(v)))) return;
 
-		const totalPastedChars = pastedData.length;
-		const hasNonEmptyInput = this.inputValues.slice(0, index).some(Boolean);
-		//const startPos = !hasNonEmptyInput ? 0 : index;
-		let startPos = 0
-		if(hasNonEmptyInput) {
-			console.log('hasNonEmptyInput',this.inputValues);
-			if(!['V','v'].includes(this.inputValues[index])) {
-				startPos = index;
-			}
+		console.log({index,a:this.inputValues[index - 1]})
+		let si = index - 1;
+		if(this.inputValues[index - 1].toLowerCase() === 'v') {
+			console.log('its v')
+			this.inputValues[index - 1] = '';
+		} else {
+			si =index
 		}
+		const totalPastedChars = pastedData.length;
+		console.log("sll",this.inputValues.slice(0, index))
+		const hasNonEmptyInput = this.inputValues.slice(0, index).some(Boolean);
+		console.log({hasNonEmptyInput});
+		const startPos = !hasNonEmptyInput ? 0 : si;
+		console.log({startPos})
 		const endPos = Math.min(this.numInputs, startPos + totalPastedChars);
 
 		for (let pos = startPos; pos < endPos; pos++) {
 			if (pastedData.length > 0) {
-				this.inputValues[pos] = pastedData.shift() ?? '';
+				console.log({ipp:this.inputType[pos],pos})
+				let val = checkValidation(getInputType(this.inputType[pos]), pastedData.shift()) ?? ''
+				console.log({val})
+				this.inputValues[pos] = val;
 				this.setFocusIndex(Math.min(this.numInputs - 1, pos + 1));
 			} else {
 				break;
