@@ -1,6 +1,5 @@
 import {
 	applyFocusStyle,
-	checkValidation,
 	getInputFocusStyles,
 	getInputType,
 	getValidInput,
@@ -171,6 +170,8 @@ export class OnBlurClass extends EventHandler {
 }
 
 export class OnPasteClass extends EventHandler {
+	#restrictPaste = true;
+
 	constructor({ numInputs, inputValues, setFocusIndex, inputType }) {
 		super('onPaste');
 		this.numInputs = numInputs;
@@ -179,39 +180,33 @@ export class OnPasteClass extends EventHandler {
 		this.inputType = inputType;
 	}
 
-	#allowPaste = true;
-
-	defaultHandler(event, index) {
+	defaultHandler(event, currentIndex) {
 		event.preventDefault();
-		const pastedData = event.clipboardData
-			.getData('text/plain')
-			.slice(0, this.numInputs)
-			.split('');
+		if(this.#restrictPaste) return;
+		const clipboardText = event.clipboardData
+			.getData("text/plain")
+			.slice(0, this.numInputs) // limit to max input length
+			.split("");
 
-		if (this.inputType === 'number' && pastedData.some((v) => isNaN(Number(v)))) return;
+		let insertionStartIndex = currentIndex - 1;
 
-		console.log({index,a:this.inputValues[index - 1]})
-		let si = index - 1;
-		if(this.inputValues[index - 1]?.toLowerCase() === 'v') {
-			console.log('its v')
-			this.inputValues[index - 1] = '';
+		// Handle case where previous value is 'v' (from Ctrl+V)
+		if (this.inputValues[currentIndex - 1]?.toLowerCase() === "v") {
+			this.inputValues[currentIndex - 1] = "";
 		} else {
-			si =index
+			insertionStartIndex = currentIndex;
 		}
-		const totalPastedChars = pastedData.length;
-		console.log("sll",this.inputValues.slice(0, index))
-		const hasNonEmptyInput = this.inputValues.slice(0, index).some(Boolean);
-		console.log({hasNonEmptyInput});
-		const startPos = !hasNonEmptyInput ? 0 : si;
-		console.log({startPos})
-		const endPos = Math.min(this.numInputs, startPos + totalPastedChars);
+		const totalCharsToInsert = clipboardText.length;
 
-		for (let pos = startPos; pos < endPos; pos++) {
-			if (pastedData.length > 0) {
-				console.log({ipp:this.inputType[pos],pos,itypee:getInputType(this.inputType)})
-				let val = getValidInput(getInputType(this.inputType), pastedData.shift()) ?? ''
-				console.log({val})
-				this.inputValues[pos] = val;
+		// Check if any non-empty value exists before currentIndex
+		const hasValuesBefore = this.inputValues.slice(0, currentIndex).some(Boolean);
+		const startIndex = !hasValuesBefore ? 0 : insertionStartIndex;
+		const endIndex = Math.min(this.numInputs, startIndex + totalCharsToInsert);
+
+		for (let pos = startIndex; pos < endIndex; pos++) {
+			if (clipboardText.length > 0) {
+				const char = clipboardText.shift();
+				this.inputValues[pos] = getValidInput(getInputType(this.inputType, pos), char) ?? "";
 				this.setFocusIndex(Math.min(this.numInputs - 1, pos + 1));
 			} else {
 				break;
@@ -219,8 +214,8 @@ export class OnPasteClass extends EventHandler {
 		}
 	}
 
-	handleInputPaste(event, index, onPaste, allowPaste) {
-		this.#allowPaste = allowPaste;
+	handleInputPaste(event, index, onPaste, restrictPaste) {
+		this.#restrictPaste = restrictPaste;
 		this._handle(event, index, onPaste);
 	}
 }

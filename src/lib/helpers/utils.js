@@ -11,7 +11,6 @@ export function removeFocusStyle(el) {
 }
 
 export function getInputType(inputType, index) {
-	console.log({ittt:inputType,a:typeof inputType})
 	if (typeof inputType === 'string') return inputType;
 	if (Array.isArray(inputType)) return inputType[index] ?? 'text';
 	return 'text';

@@ -6,17 +6,17 @@
 	let groupSeparator = $state(groupSeparatorSnippet);
 	let group = [3, 4, 2];
 	let isError = true;
-	// let inputType = [
-	// 	'number',
-	// 	'text',
-	// 	'upper-alnum',
-	// 	'lower-alnum',
-	// 	'alnum',
-	// 	'uppercase',
-	// 	'lowercase',
-	// 	/^[A-Za-z]+$/
-	// ];
-	let inputType = 'number';
+	let inputType = [
+		'number',
+		'text',
+		'upper-alnum',
+		'lower-alnum',
+		'alnum',
+		'uppercase',
+		'lowercase',
+		/^[A-Za-z]+$/
+	];
+	// let inputType = 'number';
 	let shouldAutoFocus = true;
 
 	let inputStyles = [`
@@ -121,7 +121,8 @@
 		onPaste={[onPaste, "after"]}
 		onComplete={onComplete}
 		onEnter={onEnter}
-		allowPaste={true}
+		restrictPaste={false}
+		isDisabled={false}
 	></OtpInput>
 
 	<button onclick={()=>clearOTP()}>Clear OTP</button>

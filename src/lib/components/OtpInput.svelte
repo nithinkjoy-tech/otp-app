@@ -32,7 +32,8 @@
 		onPaste,
 		onComplete,
 		onEnter,
-		allowPaste = true
+		restrictPaste = false,
+		isDisabled = false,
 	} = $props();
 
 	function getStatefulArray(inputRefs, numInputs) {
@@ -57,95 +58,21 @@
 	let inputValues = $state(Array(numInputs).fill(''));
 	let inputRefs = getStatefulArray(inputRef, numInputs);
 
-	// // helper setter
 	const setFocusIndex = (i) => (focusIndex = i);
-	//
-	//
-	// // instantiate handlers
-	// const onInputInstance = new OnInputClass({ numInputs, setFocusIndex });
-	// const onFocusInstance = new OnFocusClass({ inputRefs, inputFocusStyle, setFocusIndex });
-	// const onBlurInstance = new OnBlurClass({ inputRefs, inputFocusStyle });
-	// const onPasteInstance = new OnPasteClass({ numInputs, inputValues, setFocusIndex, inputType });
-	// const keyDownInstance = new KeyDownClass({
-	// 	numInputs,
-	// 	inputRefs,
-	// 	setFocusIndex,
-	// 	onInputInstance,
-	// 	onFocusInstance,
-	// 	inputType,
-	// 	onEnter,
-	// 	getValue: () => value,
-	// });
-	const onInputInstance = new OnInputClass({
-		get numInputs() {
-			return numInputs; // live access
-		},
-		get setFocusIndex() {
-			return setFocusIndex;
-		}
-	});
 
-	const onFocusInstance = new OnFocusClass({
-		get inputRefs() {
-			return inputRefs;
-		},
-		get inputFocusStyle() {
-			return inputFocusStyle;
-		},
-		get setFocusIndex() {
-			return setFocusIndex;
-		}
-	});
-
-	const onBlurInstance = new OnBlurClass({
-		get inputRefs() {
-			return inputRefs;
-		},
-		get inputFocusStyle() {
-			return inputFocusStyle;
-		}
-	});
-
-	const onPasteInstance = new OnPasteClass({
-		get numInputs() {
-			return numInputs;
-		},
-		get inputValues() {
-			return inputValues;
-		},
-		get setFocusIndex() {
-			return setFocusIndex;
-		},
-		get inputType() {
-			return inputType;
-		}
-	});
-
+	const onInputInstance = new OnInputClass({ numInputs, setFocusIndex });
+	const onFocusInstance = new OnFocusClass({ inputRefs, inputFocusStyle, setFocusIndex });
+	const onBlurInstance = new OnBlurClass({ inputRefs, inputFocusStyle });
+	const onPasteInstance = new OnPasteClass({ numInputs, inputValues, setFocusIndex, inputType });
 	const keyDownInstance = new KeyDownClass({
-		get numInputs() {
-			return numInputs;
-		},
-		get inputRefs() {
-			return inputRefs;
-		},
-		get setFocusIndex() {
-			return setFocusIndex;
-		},
-		get onInputInstance() {
-			return onInputInstance;
-		},
-		get onFocusInstance() {
-			return onFocusInstance;
-		},
-		get inputType() {
-			return inputType;
-		},
-		get onEnter() {
-			return onEnter;
-		},
-		get value() {        // ✅ now directly as getter
-			return value;
-		}
+		numInputs,
+		inputRefs,
+		setFocusIndex,
+		onInputInstance,
+		onFocusInstance,
+		inputType,
+		onEnter,
+		getValue: () => value,
 	});
 
 	onMount(() => {
@@ -250,14 +177,15 @@
 					inputValues[index] = v?.toString()?.substring(0, 1);
 				}
 			}
+			disabled={isDisabled}
 			autoComplete="off"
 			placeholder={ph}
 			aria-label={`Please enter OTP character ${index + 1}`}
-			onkeydown={(e) => keyDownInstance.handleKeyDown(e, index, keyDown, allowPaste)}
+			onkeydown={(e) => keyDownInstance.handleKeyDown(e, index, keyDown)}
 			oninput={(e) => onInputInstance.handleOnInput(e, index, onInput)}
 			onfocus={(e) => onFocusInstance.handleInputFocus(e, index, onFocus)}
 			onblur={(e) => onBlurInstance.handleInputBlur(e, index, onBlur)}
-			onpaste={(e) => onPasteInstance.handleInputPaste(e, index, onPaste, allowPaste)}
+			onpaste={(e) => onPasteInstance.handleInputPaste(e, index, onPaste, restrictPaste)}
 		/>
 		{@render renderSeparator(index)}
 	{/each}
