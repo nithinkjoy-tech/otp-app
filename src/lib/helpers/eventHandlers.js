@@ -170,7 +170,7 @@ export class OnBlurClass extends EventHandler {
 }
 
 export class OnPasteClass extends EventHandler {
-	#restrictPaste = true;
+	#restrictPaste = false;
 
 	constructor({ numInputs, inputValues, setFocusIndex, inputType }) {
 		super('onPaste');
