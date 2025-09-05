@@ -40,9 +40,7 @@ export class EventHandler {
 					);
 			}
 		} else if (config) {
-			throw new TypeError(
-				`Expected '${this.eventName}' to be an array, but got ${typeof config}`
-			);
+			throw new TypeError(`Expected '${this.eventName}' to be an array, but got ${typeof config}`);
 		} else {
 			this.defaultHandler(event, index);
 		}
@@ -62,9 +60,7 @@ export class OnInputClass extends EventHandler {
 			event.key === 'Backspace' ||
 			event.key === 'deleteContentCut';
 
-		this.setFocusIndex(
-			isDelete ? index - 1 : Math.min(index + 1, this.numInputs - 1)
-		);
+		this.setFocusIndex(isDelete ? index - 1 : Math.min(index + 1, this.numInputs - 1));
 	}
 
 	handleOnInput(event, index, onInput) {
@@ -73,7 +69,16 @@ export class OnInputClass extends EventHandler {
 }
 
 export class KeyDownClass extends EventHandler {
-	constructor({ numInputs, inputRefs, setFocusIndex, onInputInstance, onFocusInstance, inputType, onEnter, getValue }) {
+	constructor({
+		numInputs,
+		inputRefs,
+		setFocusIndex,
+		onInputInstance,
+		onFocusInstance,
+		inputType,
+		onEnter,
+		getValue
+	}) {
 		super('keyDown');
 		this.numInputs = numInputs;
 		this.inputRefs = inputRefs;
@@ -93,8 +98,8 @@ export class KeyDownClass extends EventHandler {
 					: this.onFocusInstance.handleInputFocus(event, index - 1);
 				break;
 			case 'Enter':
-				if(this.onEnter) {
-					if(typeof this.onEnter === 'function') {
+				if (this.onEnter) {
+					if (typeof this.onEnter === 'function') {
 						this.onEnter(this.getValue());
 					} else {
 						throw new TypeError('onEnter must be a function');
@@ -139,10 +144,7 @@ export class OnFocusClass extends EventHandler {
 	defaultHandler(event, index) {
 		this.setFocusIndex(index);
 		if (this.inputFocusStyle) {
-			applyFocusStyle(
-				this.inputRefs[index],
-				getInputFocusStyles(this.inputFocusStyle, index)
-			);
+			applyFocusStyle(this.inputRefs[index], getInputFocusStyles(this.inputFocusStyle, index));
 		}
 	}
 
@@ -182,17 +184,17 @@ export class OnPasteClass extends EventHandler {
 
 	defaultHandler(event, currentIndex) {
 		event.preventDefault();
-		if(this.#restrictPaste) return;
+		if (this.#restrictPaste) return;
 		const clipboardText = event.clipboardData
-			.getData("text/plain")
+			.getData('text/plain')
 			.slice(0, this.numInputs) // limit to max input length
-			.split("");
+			.split('');
 
 		let insertionStartIndex = currentIndex - 1;
 
 		// Handle case where previous value is 'v' (from Ctrl+V)
-		if (this.inputValues[currentIndex - 1]?.toLowerCase() === "v") {
-			this.inputValues[currentIndex - 1] = "";
+		if (this.inputValues[currentIndex - 1]?.toLowerCase() === 'v') {
+			this.inputValues[currentIndex - 1] = '';
 		} else {
 			insertionStartIndex = currentIndex;
 		}
@@ -206,7 +208,7 @@ export class OnPasteClass extends EventHandler {
 		for (let pos = startIndex; pos < endIndex; pos++) {
 			if (clipboardText.length > 0) {
 				const char = clipboardText.shift();
-				this.inputValues[pos] = getValidInput(getInputType(this.inputType, pos), char) ?? "";
+				this.inputValues[pos] = getValidInput(getInputType(this.inputType, pos), char) ?? '';
 				this.setFocusIndex(Math.min(this.numInputs - 1, pos + 1));
 			} else {
 				break;

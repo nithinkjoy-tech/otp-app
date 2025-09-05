@@ -19,29 +19,42 @@
 	// let inputType = 'number';
 	let shouldAutoFocus = true;
 
-	let inputStyles = [`
+	let inputStyles = [
+		`
 		border: 2px solid green;
 		border-radius: 5px;
-	`,,,,`
+	`,
+		,
+		,
+		,
+		`
 		border: 2px solid brown;
 		border-radius: 5px;
-	`];
-	
-	let inputFocusStyle = `
-	border: 2px solid pink;
 	`
+	];
+
+	let inputFocusStyle = `
+		border: 2px solid pink;
+	`;
 
 	let inputErrorStyle = [
 		`border: 2px solid purple;`,
 		`border: 2px solid pink;`,
 		`border: 2px solid blue;`,
 		`border: 2px solid brown;`
-	]
+	];
+
+	let inputDisabledStyle = `border: 2px solid blue;
+		background: pink
+		;`;
 
 	let containerStyles = `
 		gap: unset;
 	`;
 
+	let placeholderStyle = `
+	color: red;
+	font-size: 10px;`;
 
 	function onChange(input, event, index) {
 		console.log('onChange clalled', event, index);
@@ -55,13 +68,9 @@
 		console.log('onInput clalled', event, index);
 	}
 
-	function onFocus(event, index) {
+	function onFocus(event, index) {}
 
-	}
-
-	function onBlur(event, index) {
-
-	}
+	function onBlur(event, index) {}
 
 	function onPaste(event, index) {
 		// console.log('onPaste clalled', event, index);
@@ -83,10 +92,9 @@
 
 	function clearOTP() {
 		value = '';
-		console.log('clearOTP called',inputRef);
-		inputRef[0].focus()
+		console.log('clearOTP called', inputRef);
+		inputRef[0].focus();
 	}
-
 </script>
 
 {#snippet separatorSnippet()}
@@ -99,8 +107,8 @@
 
 <div id="app">
 	<OtpInput
-		bind:inputRef = {inputRef}
-		bind:value = {value}
+		bind:inputRef
+		bind:value
 		{group}
 		{containerStyles}
 		{inputStyles}
@@ -114,18 +122,20 @@
 		{inputType}
 		{separator}
 		{isError}
-		keyDown={[keyDown, "after"]}
-		onInput={[onInput, "after"]}
-		onFocus={[onFocus, "after"]}
-		onBlur={[onBlur, "after"]}
-		onPaste={[onPaste, "after"]}
-		onComplete={onComplete}
-		onEnter={onEnter}
+		keyDown={[keyDown, 'after']}
+		onInput={[onInput, 'after']}
+		onFocus={[onFocus, 'after']}
+		onBlur={[onBlur, 'after']}
+		onPaste={[onPaste, 'after']}
+		{onComplete}
+		{onEnter}
 		restrictPaste={false}
 		isDisabled={false}
+		{inputDisabledStyle}
+		{placeholderStyle}
 	></OtpInput>
 
-	<button onclick={()=>clearOTP()}>Clear OTP</button>
+	<button onclick={() => clearOTP()}>Clear OTP</button>
 </div>
 
 <style>

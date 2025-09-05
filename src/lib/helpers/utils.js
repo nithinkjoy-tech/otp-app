@@ -16,7 +16,16 @@ export function getInputType(inputType, index) {
 	return 'text';
 }
 
-export function getInputStyles(isError, inputErrorStyle, inputStyles, index) {
+export function getInputStyles(
+	inputRefs,
+	isError,
+	inputErrorStyle,
+	isDisabled,
+	inputDisabledStyle,
+	inputStyles,
+	index
+) {
+	if (isDisabled && inputDisabledStyle) return getInputDisabledStyle(inputDisabledStyle, index);
 	if (isError && inputErrorStyle) return getInputErrorStyle(inputErrorStyle, index);
 	if (typeof inputStyles === 'string') return inputStyles;
 	if (Array.isArray(inputStyles)) return inputStyles[index] || '#1e1e1e';
@@ -31,6 +40,12 @@ export function getInputErrorStyle(inputErrorStyle, index) {
 	if (typeof inputErrorStyle === 'string') return inputErrorStyle;
 	if (Array.isArray(inputErrorStyle)) return inputErrorStyle[index] || 'red';
 	throw new Error('inputErrorStyle must be a string or array of strings');
+}
+
+export function getInputDisabledStyle(inputDisabledStyle, index) {
+	if (typeof inputDisabledStyle === 'string') return inputDisabledStyle;
+	if (Array.isArray(inputDisabledStyle)) return inputDisabledStyle[index] || 'gray';
+	throw new Error('inputDisabledStyle must be a string or array of strings');
 }
 
 export function isInvalidNumberKey(key) {
@@ -106,7 +121,6 @@ export function getValidInput(inputType, value) {
 			return '';
 	}
 }
-
 
 export function validateInput(e, index, _inputType = 'text') {
 	const key = e.key;

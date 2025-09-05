@@ -34,6 +34,8 @@
 		onEnter,
 		restrictPaste = false,
 		isDisabled = false,
+		inputDisabledStyle = '',
+		placeholderStyle = ''
 	} = $props();
 
 	function getStatefulArray(inputRefs, numInputs) {
@@ -57,6 +59,7 @@
 	let focusIndex = $state(null);
 	let inputValues = $state(Array(numInputs).fill(''));
 	let inputRefs = getStatefulArray(inputRef, numInputs);
+	let scopedClass = $state('');
 
 	const setFocusIndex = (i) => (focusIndex = i);
 
@@ -72,11 +75,31 @@
 		onFocusInstance,
 		inputType,
 		onEnter,
-		getValue: () => value,
+		getValue: () => value
 	});
 
 	onMount(() => {
 		if (shouldAutoFocus) focusIndex = 0;
+
+		// generate client-only scoped class to avoid SSR/client mismatch
+		if (!scopedClass) {
+			const uid = globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2, 8);
+			scopedClass = `otp-input-scope-${uid}`;
+		}
+		// inject placeholder style and clean up on destroy
+		let styleEl;
+		if (placeholderStyle) {
+			styleEl = document.createElement('style');
+			styleEl.textContent = `
+     .${scopedClass} .single-otp-input::placeholder {
+       ${placeholderStyle}
+     }
+   `;
+			document.head.appendChild(styleEl);
+		}
+		return () => {
+			styleEl?.remove();
+		};
 	});
 
 	$effect(() => {
@@ -160,11 +183,19 @@
 	{/if}
 {/snippet}
 
-<div class="otp-input-lib-container" style={containerStyles}>
+<div class={`otp-input-lib-container ${scopedClass}`} style={containerStyles}>
 	{#each Array(numInputs).fill() as _, index}
 		{@const type = getInputType(inputType, index)}
 		{@const ph = placeholder[index] || ''}
-		{@const inputStyle = getInputStyles(isError, inputErrorStyle, inputStyles, index)}
+		{@const inputStyle = getInputStyles(
+			inputRefs,
+			isError,
+			inputErrorStyle,
+			isDisabled,
+			inputDisabledStyle,
+			inputStyles,
+			index
+		)}
 
 		<input
 			class={['single-otp-input', isError && 'otp-input-error']}
