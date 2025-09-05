@@ -91,10 +91,10 @@
 		if (placeholderStyle) {
 			styleEl = document.createElement('style');
 			styleEl.textContent = `
-     .${scopedClass} .single-otp-input::placeholder {
-       ${placeholderStyle}
-     }
-   `;
+				.${scopedClass} .single-otp-input::placeholder {
+				 ${placeholderStyle}
+				}
+   		`;
 			document.head.appendChild(styleEl);
 		}
 		return () => {
