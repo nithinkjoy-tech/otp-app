@@ -88,6 +88,7 @@ export function checkValidation(inputType, value) {
 				return /^[a-zA-Z0-9]$/.test(value);
 
 			case 'text':
+			case 'password':
 				return true;
 
 			default:
@@ -115,6 +116,7 @@ export function getValidInput(inputType, value) {
 		case 'number':
 		case 'alnum':
 		case 'text':
+		case 'password':
 			return value;
 
 		default:

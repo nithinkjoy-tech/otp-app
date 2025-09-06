@@ -1,5 +1,6 @@
 <script>
 	import OtpInput from '$lib/components/OtpInput.svelte';
+	import { getInputType, getValidInput } from '$lib/helpers/utils.js';
 	let numInputs = 9;
 	let placeholder = '12345';
 	let separator = $state(separatorSnippet);
@@ -14,7 +15,8 @@
 		'alnum',
 		'uppercase',
 		'lowercase',
-		/^[A-Za-z]+$/
+		/^[A-Za-z]+$/,
+		'password'
 	];
 	// let inputType = 'number';
 	let shouldAutoFocus = true;
@@ -126,13 +128,12 @@
 		onInput={[onInput, 'after']}
 		onFocus={[onFocus, 'after']}
 		onBlur={[onBlur, 'after']}
-		onPaste={[onPaste, 'after']}
+		onPaste={[onPaste, 'replace']}
 		{onComplete}
 		{onEnter}
 		restrictPaste={false}
 		isDisabled={false}
 		{inputDisabledStyle}
-		{placeholderStyle}
 	></OtpInput>
 
 	<button onclick={() => clearOTP()}>Clear OTP</button>

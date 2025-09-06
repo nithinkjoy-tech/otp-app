@@ -183,7 +183,7 @@
 	{/if}
 {/snippet}
 
-<div class={`otp-input-lib-container ${scopedClass}`} style={containerStyles}>
+<div id="otp-input-lib-container" class={`otp-input-lib-container ${scopedClass}`} style={containerStyles}>
 	{#each Array(numInputs).fill() as _, index}
 		{@const type = getInputType(inputType, index)}
 		{@const ph = placeholder[index] || ''}
@@ -198,6 +198,7 @@
 		)}
 
 		<input
+			id={`svelte-otp-inputbox-${index}`}
 			class={['single-otp-input', isError && 'otp-input-error']}
 			style={inputStyle}
 			{type}
