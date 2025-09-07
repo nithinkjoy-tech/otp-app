@@ -74,11 +74,7 @@
 
 	function onBlur(event, index) {}
 
-	function onPaste(event, index) {
-		// console.log('onPaste clalled', event, index);
-		// alert('Pasting is not allowed');
-		// event.preventDefault();
-	}
+
 
 	function onComplete(value) {
 		console.log('onComplete called', value);
@@ -91,11 +87,51 @@
 	let inputRef = $state(Array(numInputs).fill(null));
 	//let inputRef = "hel;lo";
 	let value = $state('');
+	let otp;
+
+	function onPaste(event, currentIndex) {
+		event.preventDefault();
+		console.log("paste",event)
+		event.preventDefault();
+		const clipboardText = event.clipboardData
+			.getData('text/plain')
+			.slice(0, numInputs) // limit to max input length
+			.split('');
+
+		let insertionStartIndex = currentIndex - 1;
+
+		// Handle case where previous value is 'v' (from Ctrl+V)
+		if (otp.internal.inputValues[currentIndex - 1]?.toLowerCase() === 'v') {
+			inputValues[currentIndex - 1] = '';
+		} else {
+			insertionStartIndex = currentIndex;
+		}
+		const totalCharsToInsert = clipboardText.length;
+
+		// Check if any non-empty value exists before currentIndex
+		const hasValuesBefore = otp.internal.inputValues.slice(0, currentIndex).some(Boolean);
+		const startIndex = !hasValuesBefore ? 0 : insertionStartIndex;
+		const endIndex = Math.min(numInputs, startIndex + totalCharsToInsert);
+
+		for (let pos = startIndex; pos < endIndex; pos++) {
+			if (clipboardText.length > 0) {
+				const char = clipboardText.shift();
+				otp.internal.inputValues[pos] = getValidInput(getInputType(inputType, pos), char) ?? '';
+				otp.internal.setFocusIndex(Math.min(numInputs - 1, pos + 1));
+			} else {
+				break;
+			}
+		}
+	}
 
 	function clearOTP() {
 		value = '';
 		console.log('clearOTP called', inputRef);
 		inputRef[0].focus();
+	}
+
+	function displayValue() {
+		console.log('displayValue called', value);
 	}
 </script>
 
@@ -111,6 +147,7 @@
 	<OtpInput
 		bind:inputRef
 		bind:value
+		bind:this={otp}
 		{group}
 		{containerStyles}
 		{inputStyles}
@@ -137,6 +174,7 @@
 	></OtpInput>
 
 	<button onclick={() => clearOTP()}>Clear OTP</button>
+	<button onclick={() => displayValue()}>Display value</button>
 </div>
 
 <style>

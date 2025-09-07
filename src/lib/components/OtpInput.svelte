@@ -63,6 +63,11 @@
 
 	const setFocusIndex = (i) => (focusIndex = i);
 
+	export const internal = {
+		inputValues,
+		setFocusIndex,
+	}
+
 	const onInputInstance = new OnInputClass({ numInputs, setFocusIndex });
 	const onFocusInstance = new OnFocusClass({ inputRefs, inputFocusStyle, setFocusIndex });
 	const onBlurInstance = new OnBlurClass({ inputRefs, inputFocusStyle });
