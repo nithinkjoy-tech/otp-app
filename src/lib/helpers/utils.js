@@ -153,6 +153,4 @@ export function validateInput(e, index, _inputType = 'text') {
 			transformCase(e, transformed);
 		}
 	}
-
-	updateValue(e.target.value.substring(0, 1));
 }
