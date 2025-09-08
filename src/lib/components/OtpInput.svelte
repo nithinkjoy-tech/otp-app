@@ -24,7 +24,7 @@
 		inputFocusStyle = ``,
 		inputErrorStyle = ``,
 		inputRef,
-		value = $bindable(''),
+		value = '',
 		keyDown,
 		onInput,
 		onFocus,
@@ -122,14 +122,6 @@
 		if (group) {
 			let groupSum = group.reduce((acc, curr) => acc + curr);
 			if (groupSum !== numInputs) throw new Error('Sum of groups must be equal to numInputs');
-		}
-	});
-
-	$effect(() => {
-		if (value === '') {
-			for (let i = 0; i < numInputs; i++) {
-				inputValues[i] = '';
-			}
 		}
 	});
 
