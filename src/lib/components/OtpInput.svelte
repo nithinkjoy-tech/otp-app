@@ -64,8 +64,10 @@
 	const setFocusIndex = (i) => (focusIndex = i);
 
 	export const internal = {
+		get focusIndex() { return focusIndex; },
 		inputValues,
 		setFocusIndex,
+		inputRefs,
 	}
 
 	const onInputInstance = new OnInputClass({ numInputs, setFocusIndex });
