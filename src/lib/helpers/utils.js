@@ -103,6 +103,7 @@ export function checkValidation(inputType, value) {
 
 export function getValidInput(inputType, value) {
 	if (!checkValidation(inputType, value)) return '';
+	if (inputType instanceof RegExp) return inputType.test(value) ? value : '';
 
 	switch (inputType) {
 		case 'uppercase':
@@ -127,12 +128,10 @@ export function getValidInput(inputType, value) {
 export function validateInput(e, index, _inputType = 'text') {
 	const key = e.key;
 
-	// handle array case
 	if (Array.isArray(_inputType)) {
 		return validateInput(e, index, _inputType[index]);
 	}
 
-	// handle regex case
 	if (_inputType instanceof RegExp) {
 		if (!_inputType.test(key)) e.preventDefault();
 		return;
@@ -154,4 +153,6 @@ export function validateInput(e, index, _inputType = 'text') {
 			transformCase(e, transformed);
 		}
 	}
+
+	updateValue(e.target.value.substring(0, 1));
 }
