@@ -1,6 +1,6 @@
 <script>
 	import OtpInput from '$lib/components/OtpInput.svelte';
-	import { getInputType, getValidInput } from '$lib/helpers/utils.js';
+	import { getInputType, getValidInput, setValue } from '$lib/helpers/utils.js';
 	let numInputs = 9;
 	let placeholder = '12345';
 	let separator = $state(separatorSnippet);
@@ -21,18 +21,25 @@
 	// let inputType = 'number';
 	let shouldAutoFocus = true;
 
+	// let inputStyles = [
+	// 	`
+	// 	border: 2px solid green;
+	// 	border-radius: 5px;
+	// `,
+	// 	,
+	// 	,
+	// 	,
+	// 	`
+	// 	border: 2px solid brown;
+	// 	border-radius: 5px;
+	// `
+	// ];
+
 	let inputStyles = [
-		`
-		border: 2px solid green;
-		border-radius: 5px;
-	`,
-		,
-		,
-		,
-		`
-		border: 2px solid brown;
-		border-radius: 5px;
-	`
+		{
+			border: `2px solid green`,
+			borderRadius: `5px`,
+		}
 	];
 
 	let inputFocusStyle = `
@@ -73,8 +80,6 @@
 	function onFocus(event, index) {}
 
 	function onBlur(event, index) {}
-
-
 
 	function onComplete(value) {
 		console.log('onComplete called', value);
@@ -125,7 +130,7 @@
 	}
 
 	function clearOTP() {
-		value = '';
+		setValue('987654321');
 		console.log('clearOTP called', inputRef);
 		inputRef[0].focus();
 	}

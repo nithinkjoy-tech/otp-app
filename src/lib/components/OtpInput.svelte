@@ -1,6 +1,14 @@
+<script module>
+	export const stateData = {};
+
+	export function setData(data) {
+		stateData.data = data;
+	}
+</script>
+
 <script>
 	import { onMount } from 'svelte';
-	import { getInputStyles, getInputType, isSnippet } from '../helpers/utils.js';
+	import { setValue, getInputStyles, getInputType, isSnippet } from '../helpers/utils.js';
 
 	import {
 		OnInputClass,
@@ -61,14 +69,19 @@
 	let inputRefs = getStatefulArray(inputRef, numInputs);
 	let scopedClass = $state('');
 
+	setData({ inputValues, numInputs, inputType });
+
 	const setFocusIndex = (i) => (focusIndex = i);
 
 	export const internal = {
-		get focusIndex() { return focusIndex; },
+		get focusIndex() {
+			return focusIndex;
+		},
 		inputValues,
 		setFocusIndex,
 		inputRefs,
-	}
+		setValue
+	};
 
 	const onInputInstance = new OnInputClass({ numInputs, setFocusIndex });
 	const onFocusInstance = new OnFocusClass({ inputRefs, inputFocusStyle, setFocusIndex });
@@ -182,10 +195,23 @@
 	{/if}
 {/snippet}
 
-<div id="otp-input-lib-container" class={`otp-input-lib-container ${scopedClass}`} style={containerStyles}>
+<div
+	id="otp-input-lib-container"
+	class={`otp-input-lib-container ${scopedClass}`}
+	style={containerStyles}
+>
 	{#each Array(numInputs).fill() as _, index}
 		{@const type = getInputType(inputType, index)}
 		{@const ph = placeholder[index] || ''}
+		{@const inputClass = getInputClass(
+			inputRefs,
+			isError,
+			inputErrorStyle,
+			isDisabled,
+			inputDisabledStyle,
+			inputStyles,
+			index
+		)}
 		{@const inputStyle = getInputStyles(
 			inputRefs,
 			isError,
@@ -198,7 +224,7 @@
 
 		<input
 			id={`svelte-otp-inputbox-${index}`}
-			class={['single-otp-input', isError && 'otp-input-error']}
+			class={['single-otp-input', isError && 'otp-input-error', inputClass]}
 			style={inputStyle}
 			{type}
 			bind:this={inputRefs[index]}

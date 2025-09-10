@@ -1,3 +1,11 @@
+import { stateData } from "../components/OtpInput.svelte"
+
+export function setValue(values) {
+	for (let i = 0; i < stateData.data.numInputs; i++) {
+		stateData.data.inputValues[i] = getValidInput(getInputType(stateData.data.inputType, i), values[i]) ?? '';
+	}
+}
+
 export function applyFocusStyle(el, style) {
 	el.dataset.prevStyle = el.style.cssText;
 	el.style.cssText += style;
@@ -16,6 +24,22 @@ export function getInputType(inputType, index) {
 	return 'text';
 }
 
+export function getInputClass(
+	inputRefs,
+	isError,
+	inputErrorStyle,
+	isDisabled,
+	inputDisabledStyle,
+	inputStyles,
+	index
+) {
+	// if (isDisabled && inputDisabledStyle) return getInputDisabledStyle(inputDisabledStyle, index);
+	// if (isError && inputErrorStyle) return getInputErrorStyle(inputErrorStyle, index);
+	if (typeof inputStyles === 'string') return inputStyles;
+	if (Array.isArray(inputStyles)) return inputStyles[index] //|| '#1e1e1e';
+	if (typeof inputStyles === 'object') return inputStyles
+}
+
 export function getInputStyles(
 	inputRefs,
 	isError,
@@ -25,10 +49,12 @@ export function getInputStyles(
 	inputStyles,
 	index
 ) {
+	console.log(inputStyles)
 	if (isDisabled && inputDisabledStyle) return getInputDisabledStyle(inputDisabledStyle, index);
 	if (isError && inputErrorStyle) return getInputErrorStyle(inputErrorStyle, index);
 	if (typeof inputStyles === 'string') return inputStyles;
-	if (Array.isArray(inputStyles)) return inputStyles[index] || '#1e1e1e';
+	if (Array.isArray(inputStyles)) return inputStyles[index] //|| '#1e1e1e';
+	if (typeof inputStyles === 'object') return inputStyles
 }
 
 export function getInputFocusStyles(inputFocusStyle, index) {
