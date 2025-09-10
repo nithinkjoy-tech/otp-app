@@ -35,12 +35,14 @@
 	// `
 	// ];
 
-	let inputStyles = [
-		{
-			border: `2px solid green`,
-			borderRadius: `5px`,
-		}
-	];
+	// let inputStyles = [
+	// 	{
+	// 		border: `2px solid green`,
+	// 		borderRadius: `5px`,
+	// 	}
+	// ];
+
+	let inputStyles = "w-16 text-center aspect-square focus:outline-none focus:ring-1 rounded-md px-4 py-3 ring-[0.4px] ring-gray-500"
 
 	let inputFocusStyle = `
 		border: 2px solid pink;
@@ -178,7 +180,7 @@
 		{inputDisabledStyle}
 	></OtpInput>
 
-	<button onclick={() => clearOTP()}>Clear OTP</button>
+	<button class="mt-8" onclick={() => clearOTP()}>Clear OTP</button>
 	<button onclick={() => displayValue()}>Display value</button>
 </div>
 

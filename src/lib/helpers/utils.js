@@ -36,8 +36,11 @@ export function getInputClass(
 	// if (isDisabled && inputDisabledStyle) return getInputDisabledStyle(inputDisabledStyle, index);
 	// if (isError && inputErrorStyle) return getInputErrorStyle(inputErrorStyle, index);
 	if (typeof inputStyles === 'string') return inputStyles;
-	if (Array.isArray(inputStyles)) return inputStyles[index] //|| '#1e1e1e';
-	if (typeof inputStyles === 'object') return inputStyles
+	if (Array.isArray(inputStyles)) {
+		if (typeof inputStyles[index] === 'string') return inputStyles[index]
+	}
+
+	return '';
 }
 
 export function getInputStyles(
@@ -50,11 +53,13 @@ export function getInputStyles(
 	index
 ) {
 	console.log(inputStyles)
-	if (isDisabled && inputDisabledStyle) return getInputDisabledStyle(inputDisabledStyle, index);
-	if (isError && inputErrorStyle) return getInputErrorStyle(inputErrorStyle, index);
-	if (typeof inputStyles === 'string') return inputStyles;
-	if (Array.isArray(inputStyles)) return inputStyles[index] //|| '#1e1e1e';
-	if (typeof inputStyles === 'object') return inputStyles
+	// if (isDisabled && inputDisabledStyle) return getInputDisabledStyle(inputDisabledStyle, index);
+	// if (isError && inputErrorStyle) return getInputErrorStyle(inputErrorStyle, index);
+	if (typeof inputStyles === 'object') return inputStyles;
+	if (Array.isArray(inputStyles)) {
+		if (typeof inputStyles === 'object') return inputStyles
+	}
+	return '';
 }
 
 export function getInputFocusStyles(inputFocusStyle, index) {

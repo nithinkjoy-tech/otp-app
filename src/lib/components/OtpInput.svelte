@@ -8,7 +8,7 @@
 
 <script>
 	import { onMount } from 'svelte';
-	import { setValue, getInputStyles, getInputType, isSnippet } from '../helpers/utils.js';
+	import { setValue, getInputClass, getInputStyles, getInputType, isSnippet } from '../helpers/utils.js';
 
 	import {
 		OnInputClass,
