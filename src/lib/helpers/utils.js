@@ -24,6 +24,27 @@ export function getInputType(inputType, index) {
 	return 'text';
 }
 
+// export function getInputClass(
+// 	inputRefs,
+// 	isError,
+// 	inputErrorStyle,
+// 	isDisabled,
+// 	inputDisabledStyle,
+// 	inputStyles,
+// 	stylePriority,
+// 	index
+// ) {
+//
+// 	// if (isDisabled && inputDisabledStyle) return getInputDisabledStyle(inputDisabledStyle, index);
+// 	// if (isError && inputErrorStyle) return getInputErrorStyle(inputErrorStyle, index);
+// 	if (typeof inputStyles === 'string') return inputStyles;
+// 	if (Array.isArray(inputStyles)) {
+// 		if (typeof inputStyles[index] === 'string') return inputStyles[index]
+// 	}
+//
+// 	return '';
+// }
+
 export function getInputClass(
 	inputRefs,
 	isError,
@@ -31,17 +52,44 @@ export function getInputClass(
 	isDisabled,
 	inputDisabledStyle,
 	inputStyles,
+	stylePriority,
 	index
 ) {
-	// if (isDisabled && inputDisabledStyle) return getInputDisabledStyle(inputDisabledStyle, index);
-	// if (isError && inputErrorStyle) return getInputErrorStyle(inputErrorStyle, index);
-	if (typeof inputStyles === 'string') return inputStyles;
-	if (Array.isArray(inputStyles)) {
-		if (typeof inputStyles[index] === 'string') return inputStyles[index]
+	const candidates = {
+		inputErrorStyle: isError && inputErrorStyle
+			? (Array.isArray(inputErrorStyle) ? inputErrorStyle[index] : inputErrorStyle)
+			: null,
+
+		inputDisabledStyle: isDisabled && inputDisabledStyle
+			? (Array.isArray(inputDisabledStyle) ? inputDisabledStyle[index] : inputDisabledStyle)
+			: null,
+
+		inputFocusStyle: inputRefs?.[index]?.focused && stylePriority.inputFocusStyle
+			? (Array.isArray(inputRefs[index]?.className) ? inputRefs[index].className[index] : inputRefs[index]?.className)
+			: null,
+
+		inputStyles: inputStyles
+			? (Array.isArray(inputStyles) ? inputStyles[index] : inputStyles)
+			: null,
+	};
+
+	// Sort keys by priority (p0 → p1 → …) and find the highest-priority style
+	const sortedKeys = Object.keys(stylePriority).sort(
+		(a, b) => stylePriority[a].localeCompare(stylePriority[b])
+	);
+
+	let overrideClass = "";
+	for (const key of sortedKeys) {
+		if (key !== "inputStyles" && candidates[key]) {
+			overrideClass = candidates[key];
+			break;
+		}
 	}
 
-	return '';
+	// inputStyles = base, overrideClass = highest priority override
+	return [candidates.inputStyles, overrideClass].filter(Boolean).join(" ");
 }
+
 
 export function getInputStyles(
 	inputRefs,
@@ -50,17 +98,57 @@ export function getInputStyles(
 	isDisabled,
 	inputDisabledStyle,
 	inputStyles,
+	stylePriority,
 	index
 ) {
-	console.log(inputStyles)
-	// if (isDisabled && inputDisabledStyle) return getInputDisabledStyle(inputDisabledStyle, index);
-	// if (isError && inputErrorStyle) return getInputErrorStyle(inputErrorStyle, index);
-	if (typeof inputStyles === 'object') return inputStyles;
-	if (Array.isArray(inputStyles)) {
-		if (typeof inputStyles === 'object') return inputStyles
+	const candidates = {
+		inputErrorStyle: isError && inputErrorStyle
+			? (Array.isArray(inputErrorStyle) ? inputErrorStyle[index] : inputErrorStyle)
+			: null,
+
+		inputDisabledStyle: isDisabled && inputDisabledStyle
+			? (Array.isArray(inputDisabledStyle) ? inputDisabledStyle[index] : inputDisabledStyle)
+			: null,
+
+		inputFocusStyle: inputRefs?.[index]?.focused && stylePriority.inputFocusStyle
+			? (Array.isArray(inputRefs[index]?.style) ? inputRefs[index].style[index] : inputRefs[index]?.style)
+			: null,
+
+		inputStyles: inputStyles
+			? (Array.isArray(inputStyles) ? inputStyles[index] : inputStyles)
+			: null,
+	};
+
+	// Sort by priority (p0 → p1 → …)
+	const sortedKeys = Object.keys(stylePriority).sort(
+		(a, b) => stylePriority[a].localeCompare(stylePriority[b])
+	);
+
+	// Start with base style (inputStyles)
+	let finalStyle = { ...(candidates.inputStyles || {}) };
+
+	// Apply overrides in order of priority
+	for (const key of sortedKeys) {
+		if (key !== "inputStyles" && candidates[key]) {
+			finalStyle = { ...finalStyle, ...candidates[key] };
+		}
 	}
-	return '';
+
+	console.log({ finalStyle });
+
+	return finalStyle;
 }
+
+export function styleObjectToString(styleObj = {}) {
+	return Object.entries(styleObj)
+		.map(([key, value]) => {
+			// Convert camelCase → kebab-case
+			const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
+			return `${cssKey}:${value}`;
+		})
+		.join("; ") + (Object.keys(styleObj).length ? ";" : "");
+}
+
 
 export function getInputFocusStyles(inputFocusStyle, index) {
 	if (typeof inputFocusStyle === 'string') return inputFocusStyle;

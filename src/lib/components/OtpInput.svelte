@@ -8,7 +8,14 @@
 
 <script>
 	import { onMount } from 'svelte';
-	import { setValue, getInputClass, getInputStyles, getInputType, isSnippet } from '../helpers/utils.js';
+	import {
+		setValue,
+		getInputClass,
+		getInputStyles,
+		getInputType,
+		isSnippet,
+		styleObjectToString
+	} from '../helpers/utils.js';
 
 	import {
 		OnInputClass,
@@ -43,7 +50,7 @@
 		restrictPaste = false,
 		isDisabled = false,
 		inputDisabledStyle = '',
-		placeholderStyle = ''
+		placeholderStyle = '',
 	} = $props();
 
 	function getStatefulArray(inputRefs, numInputs) {
@@ -68,6 +75,11 @@
 	let inputValues = $state(Array(numInputs).fill(''));
 	let inputRefs = getStatefulArray(inputRef, numInputs);
 	let scopedClass = $state('');
+	let stylePriority = {
+		"inputDisabledStyle": 'p0',
+		"inputErrorStyle": 'p1',
+		"inputFocusStyle": 'p2',
+	}
 
 	setData({ inputValues, numInputs, inputType });
 
@@ -210,21 +222,24 @@
 			isDisabled,
 			inputDisabledStyle,
 			inputStyles,
+			stylePriority,
 			index
 		)}
-		{@const inputStyle = getInputStyles(
+
+		{@const inputStyle = styleObjectToString(getInputStyles(
 			inputRefs,
 			isError,
 			inputErrorStyle,
 			isDisabled,
 			inputDisabledStyle,
 			inputStyles,
+			stylePriority,
 			index
-		)}
+		))}
 
 		<input
 			id={`svelte-otp-inputbox-${index}`}
-			class={['single-otp-input', isError && 'otp-input-error', inputClass]}
+			class={['single-otp-input', inputClass, isError && 'otp-input-error']}
 			style={inputStyle}
 			{type}
 			bind:this={inputRefs[index]}

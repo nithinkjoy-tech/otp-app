@@ -42,22 +42,42 @@
 	// 	}
 	// ];
 
-	let inputStyles = "w-16 text-center aspect-square focus:outline-none focus:ring-1 rounded-md px-4 py-3 ring-[0.4px] ring-gray-500"
+	// let inputStyles = ""
+
+	// let inputStyles = "w-16 text-center aspect-square focus:outline-none focus:ring-1 rounded-md px-4 py-3 ring-[0.4px] ring-gray-500"
+	//let inputStyles = "!w-16 !text-center !aspect-square !focus:outline-none !focus:ring-1 !rounded-md !px-4 !py-3 !ring-[0.4px] !ring-gray-500";
+	let inputStyles = {
+		width: '60px',
+		height: '60px',
+		border: '2px solid green',
+		borderRadius: '5px',
+		outline: 'none',
+		padding: '0',
+		margin: '0',
+		fontSize: '16px',
+		textAlign: 'center',
+		lineHeight: '16px',
+	}
 
 	let inputFocusStyle = `
 		border: 2px solid pink;
 	`;
 
-	let inputErrorStyle = [
-		`border: 2px solid purple;`,
-		`border: 2px solid pink;`,
-		`border: 2px solid blue;`,
-		`border: 2px solid brown;`
-	];
+	// let inputErrorStyle =
+	// 	`!border-[1px] !border-solid !border-green-500`
 
-	let inputDisabledStyle = `border: 2px solid blue;
-		background: pink
-		;`;
+	let inputErrorStyle = {
+		border: '2px solid brown',
+		borderRadius: '5px',
+		outline: 'none',
+		padding: '12px',
+		margin: '0',
+		fontSize: '16px',
+		textAlign: 'center',
+		lineHeight: '16px',
+	}
+
+	let inputDisabledStyle = "!border-[2px] !border-[blue] !bg-[pink]"
 
 	let containerStyles = `
 		gap: unset;
@@ -132,7 +152,7 @@
 	}
 
 	function clearOTP() {
-		setValue('987654321');
+		setValue('');
 		console.log('clearOTP called', inputRef);
 		inputRef[0].focus();
 	}
@@ -155,29 +175,29 @@
 		bind:inputRef
 		bind:value
 		bind:this={otp}
-		{group}
-		{containerStyles}
-		{inputStyles}
-		{inputFocusStyle}
-		{inputErrorStyle}
-		{groupSeparator}
-		{numInputs}
-		{onChange}
-		{shouldAutoFocus}
-		{placeholder}
-		{inputType}
-		{separator}
-		{isError}
+		group={group}
+		containerStyles={containerStyles}
+		inputStyles={inputStyles}
+		inputFocusStyle={inputFocusStyle}
+		inputErrorStyle={inputErrorStyle}
+		groupSeparator={groupSeparator}
+		numInputs={numInputs}
+		onChange={onChange}
+		shouldAutoFocus={shouldAutoFocus}
+		placeholder={placeholder}
+		inputType={inputType}
+		separator={separator}
+		isError={isError}
 		keyDown={[keyDown, 'after']}
 		onInput={[onInput, 'after']}
 		onFocus={[onFocus, 'after']}
 		onBlur={[onBlur, 'after']}
 		onPaste={[onPaste, 'replace']}
-		{onComplete}
-		{onEnter}
+		onComplete={onComplete}
+		onEnter={onEnter}
 		restrictPaste={false}
 		isDisabled={false}
-		{inputDisabledStyle}
+		inputDisabledStyle={inputDisabledStyle}
 	></OtpInput>
 
 	<button class="mt-8" onclick={() => clearOTP()}>Clear OTP</button>
