@@ -51,6 +51,11 @@
 		isDisabled = false,
 		inputDisabledStyle = '',
 		placeholderStyle = '',
+		stylePriority = {
+			inputDisabledStyle: 'p0',
+			inputErrorStyle: 'p1',
+			inputFocusStyle: 'p2'
+		}
 	} = $props();
 
 	function getStatefulArray(inputRefs, numInputs) {
@@ -75,11 +80,6 @@
 	let inputValues = $state(Array(numInputs).fill(''));
 	let inputRefs = getStatefulArray(inputRef, numInputs);
 	let scopedClass = $state('');
-	let stylePriority = {
-		"inputDisabledStyle": 'p0',
-		"inputErrorStyle": 'p1',
-		"inputFocusStyle": 'p2',
-	}
 
 	setData({ inputValues, numInputs, inputType });
 
@@ -96,7 +96,14 @@
 	};
 
 	const onInputInstance = new OnInputClass({ numInputs, setFocusIndex });
-	const onFocusInstance = new OnFocusClass({ inputRefs, inputFocusStyle, setFocusIndex });
+	const onFocusInstance = new OnFocusClass({
+		inputRefs,
+		inputFocusStyle,
+		setFocusIndex,
+		stylePriority,
+		isError,
+		isDisabled,
+	});
 	const onBlurInstance = new OnBlurClass({ inputRefs, inputFocusStyle });
 	const onPasteInstance = new OnPasteClass({ numInputs, inputValues, setFocusIndex, inputType });
 	const keyDownInstance = new KeyDownClass({
@@ -226,16 +233,18 @@
 			index
 		)}
 
-		{@const inputStyle = styleObjectToString(getInputStyles(
-			inputRefs,
-			isError,
-			inputErrorStyle,
-			isDisabled,
-			inputDisabledStyle,
-			inputStyles,
-			stylePriority,
-			index
-		))}
+		{@const inputStyle = styleObjectToString(
+			getInputStyles(
+				inputRefs,
+				isError,
+				inputErrorStyle,
+				isDisabled,
+				inputDisabledStyle,
+				inputStyles,
+				stylePriority,
+				index
+			)
+		)}
 
 		<input
 			id={`svelte-otp-inputbox-${index}`}

@@ -59,9 +59,9 @@
 		lineHeight: '16px',
 	}
 
-	let inputFocusStyle = `
-		border: 2px solid pink;
-	`;
+	let inputFocusStyle = {
+		border: '2px solid pink;'
+	}
 
 	// let inputErrorStyle =
 	// 	`!border-[1px] !border-solid !border-green-500`

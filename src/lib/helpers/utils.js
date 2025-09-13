@@ -6,17 +6,52 @@ export function setValue(values) {
 	}
 }
 
+// export function applyFocusStyle(el, style) {
+// 	el.dataset.prevStyle = el.style.cssText;
+// 	el.style.cssText += style;
+// }
+//
+// export function removeFocusStyle(el) {
+// 	if (el.dataset.prevStyle !== undefined) {
+// 		el.style.cssText = el.dataset.prevStyle;
+// 		delete el.dataset.prevStyle;
+// 	}
+// }
+
 export function applyFocusStyle(el, style) {
+	// Save both inline styles and classes separately
 	el.dataset.prevStyle = el.style.cssText;
-	el.style.cssText += style;
+	el.dataset.prevClass = el.className;
+
+	console.log({ style });
+
+	if (typeof style === "string") {
+		// Tailwind (string of classes)
+		el.classList.add(...style.split(/\s+/).filter(Boolean));
+	} else if (typeof style === "object" && style !== null) {
+		// Inline style object
+		console.log("style is object");
+		Object.entries(style).forEach(([key, value]) => {
+			console.log({ key, value });
+			// el.style[key] = value;
+			el.style.cssText += `${key}:${value};`;
+		});
+	}
 }
 
 export function removeFocusStyle(el) {
+	console.log("removeFocusStyle hh", el);
 	if (el.dataset.prevStyle !== undefined) {
+		console.log("prevv",el.dataset.prevStyle);
 		el.style.cssText = el.dataset.prevStyle;
 		delete el.dataset.prevStyle;
 	}
+	if (el.dataset.prevClass !== undefined) {
+		el.className = el.dataset.prevClass;
+		delete el.dataset.prevClass;
+	}
 }
+
 
 export function getInputType(inputType, index) {
 	if (typeof inputType === 'string') return inputType;
@@ -149,10 +184,10 @@ export function styleObjectToString(styleObj = {}) {
 		.join("; ") + (Object.keys(styleObj).length ? ";" : "");
 }
 
-
 export function getInputFocusStyles(inputFocusStyle, index) {
+	console.log({ inputFocusStyle });
 	if (typeof inputFocusStyle === 'string') return inputFocusStyle;
-	if (Array.isArray(inputFocusStyle)) return inputFocusStyle[index] || '#1e1e1e';
+	if (typeof inputFocusStyle === 'object') return styleObjectToString(inputFocusStyle);
 }
 
 export function getInputErrorStyle(inputErrorStyle, index) {
