@@ -18,6 +18,13 @@
 		/^[A-Za-z]+$/,
 		'password'
 	];
+
+	let stylePriority = {
+		inputDisabledStyle: 'p0',
+		inputErrorStyle: 'p1',
+		inputFocusStyle: 'p2'
+	}
+
 	// let inputType = 'number';
 	let shouldAutoFocus = true;
 
@@ -45,37 +52,40 @@
 	// let inputStyles = ""
 
 	// let inputStyles = "w-16 text-center aspect-square focus:outline-none focus:ring-1 rounded-md px-4 py-3 ring-[0.4px] ring-gray-500"
-	//let inputStyles = "!w-16 !text-center !aspect-square !focus:outline-none !focus:ring-1 !rounded-md !px-4 !py-3 !ring-[0.4px] !ring-gray-500";
-	let inputStyles = {
-		width: '60px',
-		height: '60px',
-		border: '2px solid green',
-		borderRadius: '5px',
-		outline: 'none',
-		padding: '0',
-		margin: '0',
-		fontSize: '16px',
-		textAlign: 'center',
-		lineHeight: '16px',
-	}
+	let inputStyles = "!w-16 !text-center !aspect-square !rounded-md !px-4 !py-3 !ring-[0.4px] !ring-gray-500";
+	// let inputStyles = {
+	// 	width: '60px',
+	// 	height: '60px',
+	// 	border: '2px solid green',
+	// 	borderRadius: '5px',
+	// 	outline: 'none',
+	// 	padding: '0',
+	// 	margin: '0',
+	// 	fontSize: '16px',
+	// 	textAlign: 'center',
+	// 	lineHeight: '16px',
+	// }
 
-	let inputFocusStyle = {
-		border: '2px solid pink;'
-	}
+	// let inputFocusStyle = {
+	// 	border: '2px solid pink;'
+	// }
 
-	// let inputErrorStyle =
-	// 	`!border-[1px] !border-solid !border-green-500`
+	let inputFocusStyle =
+		`!border-[1px] !border-solid !border-pink-500`
 
-	let inputErrorStyle = {
-		border: '2px solid brown',
-		borderRadius: '5px',
-		outline: 'none',
-		padding: '12px',
-		margin: '0',
-		fontSize: '16px',
-		textAlign: 'center',
-		lineHeight: '16px',
-	}
+	let inputErrorStyle =
+		`!border-[1px] !border-solid !border-green-500`
+
+	// let inputErrorStyle = {
+	// 	border: '2px solid brown',
+	// 	borderRadius: '5px',
+	// 	outline: 'none',
+	// 	padding: '12px',
+	// 	margin: '0',
+	// 	fontSize: '16px',
+	// 	textAlign: 'center',
+	// 	lineHeight: '16px',
+	// }
 
 	let inputDisabledStyle = "!border-[2px] !border-[blue] !bg-[pink]"
 
@@ -198,6 +208,7 @@
 		restrictPaste={false}
 		isDisabled={false}
 		inputDisabledStyle={inputDisabledStyle}
+		stylePriority={stylePriority}
 	></OtpInput>
 
 	<button class="mt-8" onclick={() => clearOTP()}>Clear OTP</button>

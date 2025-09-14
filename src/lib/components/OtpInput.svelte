@@ -10,11 +10,10 @@
 	import { onMount } from 'svelte';
 	import {
 		setValue,
-		getInputClass,
-		getInputStyles,
 		getInputType,
 		isSnippet,
-		styleObjectToString
+		styleObjectToString,
+		getCSS
 	} from '../helpers/utils.js';
 
 	import {
@@ -101,8 +100,7 @@
 		inputFocusStyle,
 		setFocusIndex,
 		stylePriority,
-		isError,
-		isDisabled,
+		isError
 	});
 	const onBlurInstance = new OnBlurClass({ inputRefs, inputFocusStyle });
 	const onPasteInstance = new OnPasteClass({ numInputs, inputValues, setFocusIndex, inputType });
@@ -222,7 +220,7 @@
 	{#each Array(numInputs).fill() as _, index}
 		{@const type = getInputType(inputType, index)}
 		{@const ph = placeholder[index] || ''}
-		{@const inputClass = getInputClass(
+		{@const inputClass = getCSS(
 			inputRefs,
 			isError,
 			inputErrorStyle,
@@ -231,10 +229,10 @@
 			inputStyles,
 			stylePriority,
 			index
-		)}
+		).getInputClass()}
 
 		{@const inputStyle = styleObjectToString(
-			getInputStyles(
+			getCSS(
 				inputRefs,
 				isError,
 				inputErrorStyle,
@@ -243,7 +241,7 @@
 				inputStyles,
 				stylePriority,
 				index
-			)
+			).getInputStyles()
 		)}
 
 		<input

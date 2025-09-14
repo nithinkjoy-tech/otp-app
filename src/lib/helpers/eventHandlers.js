@@ -2,6 +2,7 @@ import {
 	applyFocusStyle,
 	getInputFocusStyles,
 	getInputType,
+	getSortedKeysByPriority,
 	getValidInput,
 	removeFocusStyle,
 	validateInput
@@ -141,55 +142,19 @@ export class OnFocusClass extends EventHandler {
 		this.setFocusIndex = setFocusIndex;
 		this.stylePriority = stylePriority;
 		this.isError = isError;
-		this.isDisabled = isDisabled;
 	}
 
 	defaultHandler(event, index) {
 		this.setFocusIndex(index);
 		if (!this.inputFocusStyle) return;
 
-		// Build candidate styles
-		const candidates = {
-			error: this.isError,
-			disabled: this.isDisabled,
-			focus: true // always available
-		};
-		console.log({ candidates });
-
-		// Sort keys by priority
-		const sortedKeys = Object.keys(this.stylePriority).sort((a, b) =>
-			this.stylePriority[a].localeCompare(this.stylePriority[b])
-		);
-
-		// Pick first valid style according to priority
-		// let chosenStyle = null;
-		// for (const key of sortedKeys) {
-		//
-		// 	console.log({ key });
-		// 	if (candidates[key]) {
-		// 		chosenStyle = candidates[key];
-		// 		break;
-		// 	}
-		// }
-
-		console.log({ sortedKeys });
-
-		console.log(!this.isError, sortedKeys.indexOf('inputErrorStyle') > sortedKeys.indexOf('inputFocusStyle'));
-
+		const sortedKeys = getSortedKeysByPriority(this.stylePriority)
 		const shouldApply =
-			sortedKeys.indexOf('inputErrorStyle') > sortedKeys.indexOf('inputFocusStyle');
+			!this.isError || sortedKeys.indexOf('inputErrorStyle') > sortedKeys.indexOf('inputFocusStyle');
 
-		if (shouldApply) {
+		if (shouldApply && this.inputFocusStyle) {
 			applyFocusStyle(this.inputRefs[index], this.inputFocusStyle);
 		}
-
-		// if (chosenStyle) {
-		// 	console.log({ chosenStyle });
-		// 	applyFocusStyle(
-		// 		this.inputRefs[index],
-		// 		getInputFocusStyles(chosenStyle, index)
-		// 	);
-		// }
 	}
 
 	handleInputFocus(event, index, onFocus) {
