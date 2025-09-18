@@ -26,7 +26,7 @@
 
 	let {
 		inputType = 'number',
-		numInputs = 4,
+		numInputs,
 		separator = '-',
 		groupSeparator = '||',
 		shouldAutoFocus = false,
@@ -74,6 +74,8 @@
 		let _inputRefs = $state(Array(numInputs).fill(null));
 		return _inputRefs;
 	}
+
+	if(!numInputs || typeof numInputs !== "number") throw new Error("numInputs is required. It should be a number. Example: numInputs={4}")
 
 	let focusIndex = $state(null);
 	let inputValues = $state(Array(numInputs).fill(''));

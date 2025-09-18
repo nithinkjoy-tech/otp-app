@@ -1,23 +1,26 @@
 <script>
-	import OtpInput from '$lib/components/OtpInput.svelte';
-	import { getInputType, getValidInput, setValue } from '$lib/helpers/utils.js';
-	let numInputs = 9;
-	let placeholder = '12345';
+	// import OtpInput from '$lib/components/OtpInput.svelte';
+	import OtpInput from "svelte-otp-input"
+	// import { getInputType, getValidInput, setValue } from '$lib/helpers/utils.js';
+	let numInputs = 4;
+	let placeholder = '1234'//'12345';
 	let separator = $state(separatorSnippet);
 	let groupSeparator = $state(groupSeparatorSnippet);
-	let group = [3, 4, 2];
+	let group = [3, 3, 3];
 	let isError = true;
-	let inputType = [
-		'number',
-		'text',
-		'upper-alnum',
-		'lower-alnum',
-		'alnum',
-		'uppercase',
-		'lowercase',
-		/^[A-Za-z]+$/,
-		'password'
-	];
+	// let inputType = [
+	// 	'number',
+	// 	'text',
+	// 	'upper-alnum',
+	// 	'lower-alnum',
+	// 	'alnum',
+	// 	'uppercase',
+	// 	'lowercase',
+	// 	/^[A-Za-z]+$/,
+	// 	'password'
+	// ];
+
+	let inputType = "number"
 
 	let stylePriority = {
 		inputDisabledStyle: 'p0',
@@ -52,7 +55,7 @@
 	// let inputStyles = ""
 
 	// let inputStyles = "w-16 text-center aspect-square focus:outline-none focus:ring-1 rounded-md px-4 py-3 ring-[0.4px] ring-gray-500"
-	let inputStyles = "!w-16 !text-center !aspect-square !rounded-md !px-4 !py-3 !ring-[0.4px] !ring-gray-500";
+	// let inputStyles =  "!w-16 !text-center !aspect-square !rounded-md !px-4 !py-3 !ring-[0.4px] !ring-gray-500";
 	// let inputStyles = {
 	// 	width: '60px',
 	// 	height: '60px',
@@ -69,6 +72,9 @@
 	// let inputFocusStyle = {
 	// 	border: '2px solid pink;'
 	// }
+
+	// let inputFocusStyle =
+	// 	`focus:!border-[1px] focus:!border-solid focus:!border-pink-500`
 
 	let inputFocusStyle =
 		`!border-[1px] !border-solid !border-pink-500`
@@ -89,13 +95,9 @@
 
 	let inputDisabledStyle = "!border-[2px] !border-[blue] !bg-[pink]"
 
-	let containerStyles = `
-		gap: unset;
-	`;
+	let containerStyle = {gap: 'unset'};
 
-	let placeholderStyle = `
-	color: red;
-	font-size: 10px;`;
+	let placeholderStyle = "placeholder:text-green-500";
 
 	function onChange(input, event, index) {
 		console.log('onChange clalled', event, index);
@@ -122,43 +124,43 @@
 	}
 
 	let inputRef = $state(Array(numInputs).fill(null));
-	//let inputRef = "hel;lo";
 	let value = $state('');
 	let otp;
 
 	function onPaste(event, currentIndex) {
-		event.preventDefault();
-		console.log("paste",event)
-		event.preventDefault();
-		const clipboardText = event.clipboardData
-			.getData('text/plain')
-			.slice(0, numInputs) // limit to max input length
-			.split('');
-
-		let insertionStartIndex = currentIndex - 1;
-
-		// Handle case where previous value is 'v' (from Ctrl+V)
-		if (otp.internal.inputValues[currentIndex - 1]?.toLowerCase() === 'v') {
-			inputValues[currentIndex - 1] = '';
-		} else {
-			insertionStartIndex = currentIndex;
-		}
-		const totalCharsToInsert = clipboardText.length;
-
-		// Check if any non-empty value exists before currentIndex
-		const hasValuesBefore = otp.internal.inputValues.slice(0, currentIndex).some(Boolean);
-		const startIndex = !hasValuesBefore ? 0 : insertionStartIndex;
-		const endIndex = Math.min(numInputs, startIndex + totalCharsToInsert);
-
-		for (let pos = startIndex; pos < endIndex; pos++) {
-			if (clipboardText.length > 0) {
-				const char = clipboardText.shift();
-				otp.internal.inputValues[pos] = getValidInput(getInputType(inputType, pos), char) ?? '';
-				otp.internal.setFocusIndex(Math.min(numInputs - 1, pos + 1));
-			} else {
-				break;
-			}
-		}
+		console.log('user pasted');
+		// event.preventDefault();
+		// console.log("paste",event)
+		// event.preventDefault();
+		// const clipboardText = event.clipboardData
+		// 	.getData('text/plain')
+		// 	.slice(0, numInputs) // limit to max input length
+		// 	.split('');
+		//
+		// let insertionStartIndex = currentIndex - 1;
+		//
+		// // Handle case where previous value is 'v' (from Ctrl+V)
+		// if (otp.internal.inputValues[currentIndex - 1]?.toLowerCase() === 'v') {
+		// 	inputValues[currentIndex - 1] = '';
+		// } else {
+		// 	insertionStartIndex = currentIndex;
+		// }
+		// const totalCharsToInsert = clipboardText.length;
+		//
+		// // Check if any non-empty value exists before currentIndex
+		// const hasValuesBefore = otp.internal.inputValues.slice(0, currentIndex).some(Boolean);
+		// const startIndex = !hasValuesBefore ? 0 : insertionStartIndex;
+		// const endIndex = Math.min(numInputs, startIndex + totalCharsToInsert);
+		//
+		// for (let pos = startIndex; pos < endIndex; pos++) {
+		// 	if (clipboardText.length > 0) {
+		// 		const char = clipboardText.shift();
+		// 		otp.internal.inputValues[pos] = getValidInput(getInputType(inputType, pos), char) ?? '';
+		// 		otp.internal.setFocusIndex(Math.min(numInputs - 1, pos + 1));
+		// 	} else {
+		// 		break;
+		// 	}
+		// }
 	}
 
 	function clearOTP() {
@@ -180,35 +182,19 @@
 	<span class="custom-group-separator"></span>
 {/snippet}
 
-<div id="app">
+<div id="app" class="otp-input">
 	<OtpInput
 		bind:inputRef
 		bind:value
-		bind:this={otp}
-		group={group}
-		containerStyles={containerStyles}
-		inputStyles={inputStyles}
-		inputFocusStyle={inputFocusStyle}
-		inputErrorStyle={inputErrorStyle}
-		groupSeparator={groupSeparator}
-		numInputs={numInputs}
-		onChange={onChange}
-		shouldAutoFocus={shouldAutoFocus}
 		placeholder={placeholder}
+		shouldAutoFocus={shouldAutoFocus}
+		containerStyle={containerStyle}
+		numInputs={numInputs}
 		inputType={inputType}
-		separator={separator}
-		isError={isError}
-		keyDown={[keyDown, 'after']}
-		onInput={[onInput, 'after']}
-		onFocus={[onFocus, 'after']}
-		onBlur={[onBlur, 'after']}
-		onPaste={[onPaste, 'replace']}
-		onComplete={onComplete}
+		onChange={onChange}
+		onPaste={[onPaste,"after"]}
 		onEnter={onEnter}
-		restrictPaste={false}
-		isDisabled={false}
-		inputDisabledStyle={inputDisabledStyle}
-		stylePriority={stylePriority}
+		onComplete={onComplete}
 	></OtpInput>
 
 	<button class="mt-8" onclick={() => clearOTP()}>Clear OTP</button>
@@ -216,6 +202,20 @@
 </div>
 
 <style>
+		/*.otp-input :global(.single-otp-input) {*/
+    /*    width: 50px;*/
+    /*    height: 48px;*/
+    /*    border: none;*/
+    /*    text-align: center;*/
+    /*    border-radius: 4px;*/
+    /*    font-size: 12px;*/
+    /*    line-height: 22px;*/
+    /*    color: #1e1e1e;*/
+    /*    border: 1px solid #ababab;*/
+    /*    background-color: #fff;*/
+    /*    -moz-appearance: textfield;*/
+		/*}*/
+
 	.custom-separator {
 		display: flex;
 		align-items: center;
@@ -229,8 +229,8 @@
 		display: flex;
 		align-items: center;
 		height: 5px;
-		width: 10px;
+		width: 20px;
 		/*border-radius: 50%;*/
-		background: #1e1e1e;
+		background: red;
 	}
 </style>

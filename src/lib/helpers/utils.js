@@ -102,7 +102,6 @@ export function getCSS(
 export function styleObjectToString(styleObj = {}) {
 	return Object.entries(styleObj)
 		.map(([key, value]) => {
-			// Convert camelCase → kebab-case
 			const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
 			return `${cssKey}:${value}`;
 		})
